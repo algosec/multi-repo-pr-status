@@ -33,7 +33,7 @@ jobs:
       - name: Build artifacts
         run: npm run build
 
-      - name: Deploy to gh-pages
+      - name: Deploy to GitHub pages (gh-pages branch)
         uses: peaceiris/actions-gh-pages@v3
         if: github.event_name != 'pull_request'
         with:

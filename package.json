@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Application that shows pull-requests status for multi-repo projects",
   "private": true,
+  "homepage": "https://algosec.github.io/multi-repo-pr-status",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

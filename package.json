@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "description": "Application that shows pull-requests status for multi-repo projects",
   "private": true,
+  "author": "AlgoSec",
+  "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://algosec.github.io/multi-repo-pr-status",
   "scripts": {
     "start": "react-scripts start",
@@ -14,16 +16,14 @@
     "type": "git",
     "url": "git+https://github.com/algosec/multi-repo-pr-status.git"
   },
+  "bugs": {
+    "url": "https://github.com/algosec/multi-repo-pr-status/issues"
+  },
   "keywords": [
     "multi-repo",
     "pull-requests",
     "visivility"
   ],
-  "author": "AlgoSec",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/algosec/multi-repo-pr-status/issues"
-  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",

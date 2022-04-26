@@ -17,22 +17,3 @@
   margin-left: 10px;
 }
 
-.App-body {
-
-}
-
-
-.active {
-  color: forestgreen;
-  border-color: forestgreen;
-}
-
-.semi-active {
-  color: darkorange;
-  border-color: darkorange;
-}
-
-.inactive {
-  color: red;
-  border-color: red;
-}

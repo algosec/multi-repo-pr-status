@@ -2,14 +2,14 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faArrowRight, faClock, faCodeBranch, faUser} from "@fortawesome/free-solid-svg-icons";
 import {faGitAlt, } from "@fortawesome/free-brands-svg-icons";
 import React from "react";
-import './PullRequests.css';
+import './PullRequestsItem.css';
 import moment from "moment";
 
 interface PullRequestProps {
   data: BitbucketGroupedPullRequest;
 }
 
-export function PullRequest(props: PullRequestProps) {
+export function PullRequestItem(props: PullRequestProps) {
 
 
   function getActivityColor(date: Date): string {

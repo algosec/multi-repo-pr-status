@@ -10,7 +10,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  ci:
+  CICD:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -29,6 +29,9 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Run lint
+        run: npm run lint
 
       - name: Build artifacts
         run: npm run build

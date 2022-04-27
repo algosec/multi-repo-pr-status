@@ -41,7 +41,7 @@ function App() {
 
   return (
     <div className="App">
-      <BrowserRouter>
+      <BrowserRouter basename="/multi-repo-pr-status">
         <header className="App-header">
           <div className="App-header-title">
             <Link to="/"><FontAwesomeIcon icon={faCodePullRequest} /> Multi-Repo PR Status</Link>

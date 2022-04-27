@@ -39,8 +39,6 @@ function App() {
     }
   }
 
-  let a = 3;
-
   return (
     <div className="App">
       <BrowserRouter>

@@ -32,12 +32,14 @@ function App() {
 
     setIsLoading(true);
     try {
-      let list = await fetchOpenPullRequestsMultiRepo(auth, settings.repositories);
+      const list = await fetchOpenPullRequestsMultiRepo(auth, settings.repositories);
       setPullRequests(list);
     } finally {
       setIsLoading(false);
     }
   }
+
+  let a = 3;
 
   return (
     <div className="App">

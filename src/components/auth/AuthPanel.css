@@ -1,0 +1,13 @@
+.LoginPanel {
+    display: flex;
+    background: #ADB6C4;
+    padding: 3px 5px;
+    border-radius: 3px;
+    width: max-content;
+    align-items: center;
+    flex-direction: column;
+}
+
+.LoginPanel *:not(:last-child) {
+    margin-right: 10px;
+}

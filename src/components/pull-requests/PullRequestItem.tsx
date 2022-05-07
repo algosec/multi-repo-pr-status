@@ -4,9 +4,10 @@ import {faGitAlt, } from "@fortawesome/free-brands-svg-icons";
 import React from "react";
 import './PullRequestsItem.css';
 import moment from "moment";
+import {GroupedPullRequest} from "../../services/DataSource";
 
 interface PullRequestProps {
-  data: BitbucketGroupedPullRequest;
+  data: GroupedPullRequest;
 }
 
 export function PullRequestItem(props: PullRequestProps) {
@@ -23,47 +24,45 @@ export function PullRequestItem(props: PullRequestProps) {
     }
   }
 
+  function getFirstLine(str: string): string  {
+    return str.split('\n')[0];
+  }
+
 
   return (
     <div className="PullRequest">
       <div className="row">
         <div>
-          <span className="hype"><FontAwesomeIcon icon={faCodeBranch} /> {props.data.source}</span>
-          &nbsp;
-          <FontAwesomeIcon icon={faArrowRight}/>
-          &nbsp;
-          <span className="hype"><FontAwesomeIcon icon={faCodeBranch} /> {props.data.destination}</span>
+          <span className="box branch-box"><FontAwesomeIcon icon={faCodeBranch} /> {props.data.source}</span>
+          <FontAwesomeIcon icon={faArrowRight} className="pr-arrow" />
+          <span className="box branch-box"><FontAwesomeIcon icon={faCodeBranch} /> {props.data.destination}</span>
         </div>
-        <div className={`date ${getActivityColor(props.data.updated_on)}`} title={moment(props.data.updated_on).format("LLLL")}>
-          <FontAwesomeIcon icon={faClock} /> Last update {moment(props.data.updated_on).fromNow()}
+        <div className={`date ${getActivityColor(props.data.updated)}`} title={moment(props.data.updated).format("LLLL")}>
+          <FontAwesomeIcon icon={faClock} /> Last update {moment(props.data.updated).fromNow()}
         </div>
-        <div className={`date ${getActivityColor(props.data.created_on)}`} title={moment(props.data.created_on).format("LLLL")}>
-          <FontAwesomeIcon icon={faClock} /> Created {moment(props.data.created_on).fromNow()}
+        <div className={`date ${getActivityColor(props.data.created)}`} title={moment(props.data.created).format("LLLL")}>
+          <FontAwesomeIcon icon={faClock} /> Created {moment(props.data.created).fromNow()}
         </div>
       </div>
-      <hr />
-      <div>
-        {props.data.pullRequests.map(item => (
-          <div key={item.destination.repository.name} className="row">
-            <div>
-              <a href={item.links.html.href} target="_blank" rel="noreferrer" className="hype">
-                <FontAwesomeIcon icon={faGitAlt} /> {item.destination.repository.name}
-              </a>
-              {item.title.split('\n')[0]}
-            </div>
-            <div>
-              <FontAwesomeIcon icon={faUser} /> {item.author.display_name}
-            </div>
-            <div className={`date ${getActivityColor(item.updated_on)}`} title={moment(item.updated_on).format("LLLL")}>
-              <FontAwesomeIcon icon={faClock} /> Last update {moment(item.updated_on).fromNow()}
-            </div>
-            <div className={`date ${getActivityColor(item.created_on)}`} title={moment(item.created_on).format("LLLL")}>
-              <FontAwesomeIcon icon={faClock} /> Created {moment(item.created_on).fromNow()}
-            </div>
+      {props.data.pullRequests.map(item => (
+        <div key={item.repository.name} className="row">
+          <div>
+            <a href={item.link} target="_blank" rel="noreferrer" className="box repo-box">
+              <FontAwesomeIcon icon={faGitAlt} /> {item.repository.name}
+            </a>
+            <span title={item.title}>{getFirstLine(item.title)}</span>
           </div>
-        ))}
-      </div>
-
+          <div>
+            <FontAwesomeIcon icon={faUser} /> {item.author}
+          </div>
+          <div className={`date ${getActivityColor(item.updated)}`} title={moment(item.updated).format("LLLL")}>
+            <FontAwesomeIcon icon={faClock} /> Last update {moment(item.updated).fromNow()}
+          </div>
+          <div className={`date ${getActivityColor(item.created)}`} title={moment(item.created).format("LLLL")}>
+            <FontAwesomeIcon icon={faClock} /> Created {moment(item.created).fromNow()}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

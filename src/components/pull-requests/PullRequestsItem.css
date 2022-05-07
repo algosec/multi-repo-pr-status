@@ -1,16 +1,26 @@
 .PullRequest {
-    border: 1px rgba(0, 0, 0, 0.38) solid;
+    border: 1px #d8dee4 solid;
     border-radius: 5px;
-    padding: 10px;
     margin-top: 20px;
 }
 
 .PullRequest .row {
     display: flex;
-    margin-bottom: 10px;
+    padding: 10px;
+    align-items: center;
+}
+.PullRequest .row:first-child {
+    background: #F7F7FF;
+}
+.PullRequest .row:not(:last-child) {
+    border-bottom: 1px #d8dee4 solid;
 }
 .PullRequest .row > *:first-child {
     flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 20px;
 }
 .PullRequest .row > .date {
     width: 225px;
@@ -22,11 +32,25 @@
     margin-right: 5px;
 }
 
-.hype {
+.pr-arrow {
+    margin: 0 8px;
+}
+
+.box {
     display: inline-block;
     color: rgb(66, 82, 110);
-    background: rgba(9, 30, 66, 0.04);
     border-radius: 3px;
-    padding: 4px 8px;
     font-weight: 500;
+}
+
+.branch-box {
+    background: #d3d5e3;
+    padding: 4px 8px;
+}
+
+.repo-box {
+    margin-right: 10px;
+    background: #F7F7FF;
+    border: 1px #d3d5e3 solid;
+    padding: 4px;
 }

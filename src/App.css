@@ -39,6 +39,3 @@
 .Sub-header > * {
   flex: 1;
 }
-.Sub-header > :last-child {
-  text-align: right;
-}

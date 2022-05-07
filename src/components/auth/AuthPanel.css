@@ -1,13 +1,13 @@
-.LoginPanel {
-    display: flex;
-    background: #ADB6C4;
-    padding: 3px 5px;
-    border-radius: 3px;
-    width: max-content;
-    align-items: center;
-    flex-direction: column;
+.auth-row *:not(:last-child) {
+    margin-right: 10px;
 }
 
-.LoginPanel *:not(:last-child) {
-    margin-right: 10px;
+.error-message {
+    color: red;
+}
+
+.login-panel input {
+    border-radius: 3px;
+    border: 1px #7D8BA1 solid;
+    padding: 3px 6px;
 }

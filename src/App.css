@@ -1,19 +1,44 @@
-.App {
-  font-family: sans-serif;
-  padding: 0 100px;
-  color: #58585b;
-}
+/* color plate: https://coolors.co/001b2e-294c60-adb6c4-ffefd3-ffc49b */
 
 .App-header {
-  padding: 50px 0;
+  padding: 20px 100px;
   display: flex;
+  align-items: center;
+  background: #294C60;
+  color: #F7F7FF;
+}
+
+.App-header a {
+  color: white;
+  text-decoration: none;
 }
 
 .App-header-title {
   flex: 1;
+  font-size: 2em;
 }
 
 .App-header-buttons button {
   margin-left: 10px;
 }
 
+.App-body {
+  padding: 50px 100px;
+  height: calc(100vh - 176px);
+}
+
+
+.Sub-header {
+  background: #d3d5e3;
+  margin: -50px -100px 50px;
+  padding: 5px 100px;
+  display: flex;
+  align-items: center;
+}
+
+.Sub-header > * {
+  flex: 1;
+}
+.Sub-header > :last-child {
+  text-align: right;
+}

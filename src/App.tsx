@@ -1,65 +1,122 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faSync, faCodePullRequest, faKey} from '@fortawesome/free-solid-svg-icons';
-import {faGithub} from '@fortawesome/free-brands-svg-icons';
-import React, {useState} from 'react';
+import {faSync, faCodePullRequest, faRightFromBracket} from '@fortawesome/free-solid-svg-icons';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import './App.css';
-import {fetchOpenPullRequestsMultiRepo, groupPullRequests} from "./services/bitbucket";
 import useLocalStorage from "use-local-storage";
 import {PullRequestsPage} from "./components/pull-requests/PullRequestsPage";
 import {BrowserRouter, Link, Navigate, Route, Routes} from "react-router-dom";
-import {AuthPage} from "./components/auth/AuthPage";
+import {AuthPanel} from "./components/auth/AuthPanel";
+import {DataSource, GroupedPullRequest, PullRequest} from "./services/DataSource";
+import {groupPullRequests} from "./services/logic";
+import {DataSourceInfo, generateDataSource} from "./services/DataSourceProvider";
+import moment from "moment";
+import {ContributeLink} from "./components/ContributeLink";
+import {DataSourceHeader} from "./components/DataSourceHeader";
+import {InitialSyncIndicator} from "./components/InitialSyncIndicator";
+import {SyncStatus} from "./components/pull-requests/SyncStatus";
+import {Moment} from "moment/moment";
 
 function App() {
-  // Currently, the settings must be provided by the user by manually set the local storage
-  // in the future, we would like to have it via GUI
-  const [settings] = useLocalStorage<Settings|null>('settings', null);
+  const [dataSourceInfo, setDataSourceInfo] = useLocalStorage<DataSourceInfo|undefined>('data-source', undefined);
+  const dataSource = useMemo<DataSource|undefined>(() => dataSourceInfo && generateDataSource(dataSourceInfo), [dataSourceInfo]);
 
-  const auth = settings?.auth;
-
-  const [pullRequests, setPullRequests] = useLocalStorage<BitbucketPullRequest[]>('pull-requests', []);
-  const groupedPullRequests: BitbucketGroupedPullRequest[] = groupPullRequests(pullRequests);
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function sync() {
-    if (isLoading) {
-      return;
-    }
-    if (!auth) {
-      console.warn('Settings are missing. Set them and re-run.');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const list = await fetchOpenPullRequestsMultiRepo(auth, settings.repositories);
-      setPullRequests(list);
-    } finally {
-      setIsLoading(false);
-    }
+  function disconnect(): void {
+    setDataSourceInfo(undefined);
+    localStorage.clear();
   }
 
   return (
     <div className="App">
       <BrowserRouter>
         <header className="App-header">
-          <div className="App-header-title">
-            <Link to="/"><FontAwesomeIcon icon={faCodePullRequest} /> Multi-Repo PR Status</Link>
-            <br />
-            <a href="https://github.com/algosec/multi-repo-pr-status" target="_blank" rel="noreferrer"><FontAwesomeIcon icon={faGithub} /> GitHub repo</a>
-          </div>
-          { auth &&
-            <div className="App-header-buttons">
-              <button onClick={sync}><FontAwesomeIcon icon={faSync} spin={isLoading}/> Sync</button>
-              <Link to="/auth"><FontAwesomeIcon icon={faKey}/> Authentication</Link>
-            </div>
-          }
+          <Link to="/" className="App-header-title"><FontAwesomeIcon icon={faCodePullRequest} /> Multi-Repo PR Status</Link>
+          <ContributeLink />
         </header>
-        <Routes>
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/" element={auth ? <PullRequestsPage groupedPullRequests={groupedPullRequests} /> : <Navigate to="/auth" />} />
-        </Routes>
+        <div className="App-body">
+          <Routes>
+            <Route path="/auth" element={!dataSourceInfo ? <AuthPanel currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={x => setDataSourceInfo(x)}/> : <Navigate to="/" />} />
+            <Route path="/*" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/auth" />} />
+          </Routes>
+        </div>
       </BrowserRouter>
+    </div>
+  );
+
+}
+
+const momentSerializer = {
+  serializer: (obj: Moment | undefined) => obj?.valueOf()?.toString() || "undefined",
+  parser: (str: string) => str === "undefined" ? undefined : moment(parseInt(str)),
+};
+
+interface AppWithDataSourceProps {
+  dataSource: DataSource;
+  dataSourceInfo: DataSourceInfo;
+  disconnect: () => void;
+}
+
+function AppWithDataSource(props: AppWithDataSourceProps) {
+  const [lastUpdate, setLastUpdate] = useLocalStorage<Moment|undefined>('pull-requests-last-update', undefined, momentSerializer);
+  const [pullRequests, setPullRequests] = useLocalStorage<PullRequest[]>('pull-requests', []);
+
+  const groupedPullRequests: GroupedPullRequest[] = groupPullRequests(pullRequests);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const sync: () => Promise<void> = useCallback(async () => {
+    const syncTitle = `Sync with ${props.dataSource.getType()}`;
+    try {
+      console.time(syncTitle);
+      console.groupCollapsed(syncTitle);
+      const startDate = moment();
+      const repositories = await props.dataSource.getRepositories();
+      const list = await props.dataSource.getPullRequests(repositories);
+      setPullRequests(list);
+      setLastUpdate(startDate);
+    } catch (err) {
+      console.error('Got error', err);
+    } finally {
+      console.groupEnd();
+      console.timeEnd(syncTitle);
+      setIsLoading(false);
+    }
+  }, [props.dataSource, setLastUpdate, setPullRequests]);
+
+  const triggerSync: () => Promise<void> = useCallback(async () => {
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    setTimeout(() => sync(), 1);
+  }, [isLoading, sync]);
+
+
+  useEffect(() => {
+    if (!lastUpdate) {
+      triggerSync();
+    }
+  }, [props.dataSourceInfo, lastUpdate, triggerSync]);
+
+
+  if (!lastUpdate) {
+    return <InitialSyncIndicator />;
+  }
+
+  return (
+    <div>
+      <div className="Sub-header">
+        <div>
+          <DataSourceHeader dataSourceInfo={props.dataSourceInfo} /> (<SyncStatus key={lastUpdate.valueOf()} lastUpdate={lastUpdate} isSyncing={isLoading} triggerSync={() => triggerSync()} />)
+        </div>
+        <div>
+          <button onClick={triggerSync} className="link-button"><FontAwesomeIcon icon={faSync} spin={isLoading}/> Sync</button>
+          <button className="link-button margin-left" onClick={() => props.disconnect()}><FontAwesomeIcon icon={faRightFromBracket}/> Disconnect</button>
+        </div>
+      </div>
+      <Routes>
+        <Route path="/" element={<PullRequestsPage groupedPullRequests={groupedPullRequests} />} />
+      </Routes>
     </div>
   );
 }

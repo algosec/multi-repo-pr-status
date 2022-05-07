@@ -1,23 +1,29 @@
-interface BitbucketCredentials {
-  username: string;
-  password: string;
-}
-
-interface BitBucketObjectLinks {
+export interface BitBucketObjectLinks {
   self: BitBucketLink;
   html: BitBucketLink;
 }
 
-interface BitBucketLink {
+export interface BitBucketLink {
   href: string;
 }
 
-interface BitbucketRepository {
-  project: string;
-  repository: string;
+export interface BitbucketWorkspace {
+  created_on: Date;
+  is_private: boolean;
+  links: BitBucketObjectLinks;
+  name: string;
+  slug: string;
+  uuid: string;
 }
 
-interface Paginate<T> {
+export interface BitbucketRepository {
+  workspace: BitbucketWorkspace;
+  slug: string;
+  full_name: string;
+  name: string;
+}
+
+export interface Paginate<T> {
   pagelen: number;
   size: number;
   page: number;
@@ -25,7 +31,7 @@ interface Paginate<T> {
   values: T[];
 }
 
-interface BitbucketPullRequest {
+export interface BitbucketPullRequest {
   title: string;
   links: BitBucketObjectLinks;
   created_on: Date;
@@ -35,10 +41,10 @@ interface BitbucketPullRequest {
   destination: BitbucketBranch;
   comment_count: number;
   task_count: number;
-  author: {display_name: string};
+  author: { display_name: string };
 }
 
-interface BitbucketBranch {
+export interface BitbucketBranch {
   commit: {
     hash: BitbucketCommitHash;
   };
@@ -54,10 +60,6 @@ interface BitbucketBranch {
 type BitbucketPullRequestState = 'OPEN' | 'DECLINED' | 'MERGED';
 type BitbucketCommitHash = string;
 
-interface BitbucketGroupedPullRequest {
-  source: string;
-  destination: string;
-  pullRequests: BitbucketPullRequest[];
-  created_on: Date;
-  updated_on: Date;
+export interface BitbucketUser {
+  display_name: string;
 }

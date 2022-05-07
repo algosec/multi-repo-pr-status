@@ -4,7 +4,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import './App.css';
 import useLocalStorage from "use-local-storage";
 import {PullRequestsPage} from "./components/pull-requests/PullRequestsPage";
-import {BrowserRouter, Link, Navigate, Route, Routes} from "react-router-dom";
+import {Link, Navigate, Route, Routes} from "react-router-dom";
 import {AuthPanel} from "./components/auth/AuthPanel";
 import {DataSource, GroupedPullRequest, PullRequest} from "./services/DataSource";
 import {groupPullRequests} from "./services/logic";
@@ -26,22 +26,21 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <BrowserRouter>
-        <header className="App-header">
-          <Link to="/" className="App-header-title"><FontAwesomeIcon icon={faCodePullRequest} /> Multi-Repo PR Status</Link>
-          <ContributeLink />
-        </header>
-        <div className="App-body">
-          <Routes>
-            <Route path="/auth" element={!dataSourceInfo ? <AuthPanel currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={x => setDataSourceInfo(x)}/> : <Navigate to="/" />} />
-            <Route path="/*" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/auth" />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
+    <div>
+      <header className="App-header">
+        <Link to="/" className="App-header-title"><FontAwesomeIcon icon={faCodePullRequest} /> Multi-Repo PR Status</Link>
+        <ContributeLink />
+      </header>
+      <div className="App-body">
+        <Routes>
+          <Route path="/auth" element={!dataSourceInfo ? <AuthPanel currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={x => setDataSourceInfo(x)}/> : <Navigate to="/" />} />
+          <Route path="/" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/auth" />} />
+          <Route path="*" element={<Navigate to="/" />}
+          />
+        </Routes>
+      </div>
     </div>
   );
-
 }
 
 const momentSerializer = {

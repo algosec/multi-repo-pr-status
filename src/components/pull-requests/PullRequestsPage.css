@@ -12,3 +12,24 @@
     color: red;
     border-color: red;
 }
+
+.filters {
+    display: flex;
+    align-items: center;
+}
+.filters > * {
+    margin-right: 10px;
+}
+
+.search-filter {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 11px 10px 12px;
+    width: 250px;
+}
+
+.filter-multi-select {
+    display: inline-block;
+    width: 200px;
+
+}

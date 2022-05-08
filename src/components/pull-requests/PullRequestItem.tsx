@@ -28,7 +28,6 @@ export function PullRequestItem(props: PullRequestProps) {
     return str.split('\n')[0];
   }
 
-
   return (
     <div className="PullRequest">
       <div className="row">

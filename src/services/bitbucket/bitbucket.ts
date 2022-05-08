@@ -52,14 +52,17 @@ export class BitbucketDataSource implements DataSource {
     try {
       await this.fetchUser();
       return null;
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
         const status = (e as AxiosError)?.response?.status;
         if (status === 401) {
           return "Invalid credentials";
         }
+        if (status === 403) {
+          return "Application password missing permission. Recreate it again";
+        }
       }
-      return e.toString();
+      return String(e);
     }
   }
 

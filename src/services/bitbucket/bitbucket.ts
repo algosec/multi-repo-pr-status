@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {Credentials, DataSource, PullRequest, Repository} from "../DataSource";
 import {DataSourceType} from "../DataSourceProvider";
 import {
@@ -48,9 +48,22 @@ export class BitbucketDataSource implements DataSource {
     });
   }
 
-  public async validateCredentials(): Promise<void> {
-    console.log(await this.fetchUser());
-    return; // TODO: fail in case of error
+  public async validateCredentials(): Promise<string|null> {
+    try {
+      await this.fetchUser();
+      return null;
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        const status = (e as AxiosError)?.response?.status;
+        if (status === 401) {
+          return "Invalid credentials";
+        }
+        if (status === 403) {
+          return "Application password missing permission. Recreate it again";
+        }
+      }
+      return String(e);
+    }
   }
 
   public async fetchUserDisplayName(): Promise<string> {

@@ -3,7 +3,7 @@ import {DataSourceType} from "./DataSourceProvider";
 export interface DataSource {
   getType(): string;
   fetchUserDisplayName(): Promise<string>;
-  validateCredentials(): Promise<void>;
+  validateCredentials(): Promise<string|null>;
   getRepositories(): Promise<Repository[]>;
   getPullRequests(repos: Repository[]): Promise<PullRequest[]>;
 }

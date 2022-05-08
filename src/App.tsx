@@ -34,9 +34,7 @@ function App() {
       <div className="App-body">
         <Routes>
           <Route path="/auth" element={!dataSourceInfo ? <AuthPanel currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={x => setDataSourceInfo(x)}/> : <Navigate to="/" />} />
-          <Route path="/" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/auth" />} />
-          <Route path="*" element={<Navigate to="/" />}
-          />
+          <Route path="*" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/auth" />} />
         </Routes>
       </div>
     </div>
@@ -108,13 +106,14 @@ function AppWithDataSource(props: AppWithDataSourceProps) {
         <div>
           <DataSourceHeader dataSourceInfo={props.dataSourceInfo} /> (<SyncStatus key={lastUpdate.valueOf()} lastUpdate={lastUpdate} isSyncing={isLoading} triggerSync={() => triggerSync()} />)
         </div>
-        <div>
+        <div className="align-right">
           <button onClick={triggerSync} className="link-button"><FontAwesomeIcon icon={faSync} spin={isLoading}/> Sync</button>
           <button className="link-button margin-left" onClick={() => props.disconnect()}><FontAwesomeIcon icon={faRightFromBracket}/> Disconnect</button>
         </div>
       </div>
       <Routes>
         <Route path="/" element={<PullRequestsPage groupedPullRequests={groupedPullRequests} />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   );

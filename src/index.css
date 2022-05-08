@@ -26,3 +26,7 @@ code {
 .margin-left {
   margin-left: 10px;
 }
+
+.align-right {
+  text-align: right;
+}

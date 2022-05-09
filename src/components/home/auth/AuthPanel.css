@@ -6,7 +6,7 @@
     color: red;
 }
 
-.login-panel input {
+.auth-row input {
     border-radius: 3px;
     border: 1px #7D8BA1 solid;
     padding: 3px 6px;

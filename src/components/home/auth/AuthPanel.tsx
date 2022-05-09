@@ -1,17 +1,17 @@
 import {faBitbucket} from '@fortawesome/free-brands-svg-icons';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React, {useState} from "react";
-import {DataSourceInfo, generateDataSource} from "../../services/DataSourceProvider";
+import {DataSourceInfo, generateDataSource} from "../../../services/DataSourceProvider";
 import {useNavigate} from "react-router-dom";
 import './AuthPanel.css';
 import {BitbucketAuthPopover} from "./BitbucketAuthPopover";
 
-interface AuthPageProps {
+interface AuthPanelProps {
   currentDataSourceInfo?: DataSourceInfo;
   updateDataSourceInfo: (dataSourceInfo: DataSourceInfo) => void;
 }
 
-export function AuthPanel(props: AuthPageProps) {
+export function AuthPanel(props: AuthPanelProps) {
 
   const [user, setUser] = useState<string>('');
   const [pass, setPass] = useState<string>('');
@@ -47,21 +47,19 @@ export function AuthPanel(props: AuthPageProps) {
   }
 
   return (
-    <div className="Sub-header login-panel">
-      <div className="auth-row">
-        <span>Connect to</span>
-        <BitbucketAuthPopover>
-          <span><FontAwesomeIcon icon={faBitbucket} /> Bitbucket:</span>
-        </BitbucketAuthPopover>
-        <label>
-          <input type="text" name="user" value={user} placeholder="Username" onChange={e=>setUser(e.target.value)}/>
-        </label>
-        <label>
-          <input type="password" name="pass" placeholder="Password" onChange={e=>setPass(e.target.value)} />
-        </label>
-        <button onClick={save} className="link-button">Connect</button>
-        {errorMessage && <span className="error-message">{errorMessage}</span>}
-      </div>
+    <div className="auth-row">
+      <span>Connect to</span>
+      <BitbucketAuthPopover>
+        <span><FontAwesomeIcon icon={faBitbucket} /> Bitbucket:</span>
+      </BitbucketAuthPopover>
+      <label>
+        <input type="text" name="user" value={user} placeholder="Username" onChange={e=>setUser(e.target.value)}/>
+      </label>
+      <label>
+        <input type="password" name="pass" placeholder="Password" onChange={e=>setPass(e.target.value)} />
+      </label>
+      <button onClick={save} className="link-button">Connect</button>
+      {errorMessage && <span className="error-message">{errorMessage}</span>}
     </div>
   );
 }

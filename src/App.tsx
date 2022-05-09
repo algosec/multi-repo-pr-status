@@ -5,7 +5,6 @@ import './App.css';
 import useLocalStorage from "use-local-storage";
 import {PullRequestsPage} from "./components/pull-requests/PullRequestsPage";
 import {Link, Navigate, Route, Routes} from "react-router-dom";
-import {AuthPanel} from "./components/auth/AuthPanel";
 import {DataSource, GroupedPullRequest, PullRequest} from "./services/DataSource";
 import {groupPullRequests} from "./services/logic";
 import {DataSourceInfo, generateDataSource} from "./services/DataSourceProvider";
@@ -15,6 +14,7 @@ import {DataSourceHeader} from "./components/DataSourceHeader";
 import {InitialSyncIndicator} from "./components/InitialSyncIndicator";
 import {SyncStatus} from "./components/pull-requests/SyncStatus";
 import {Moment} from "moment/moment";
+import {HomePage} from "./components/home/HomePage";
 
 function App() {
   const [dataSourceInfo, setDataSourceInfo] = useLocalStorage<DataSourceInfo|undefined>('data-source', undefined);
@@ -33,8 +33,8 @@ function App() {
       </header>
       <div className="App-body">
         <Routes>
-          <Route path="/auth" element={!dataSourceInfo ? <AuthPanel currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={x => setDataSourceInfo(x)}/> : <Navigate to="/" />} />
-          <Route path="*" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/auth" />} />
+          <Route path="/home" element={!dataSourceInfo ? <HomePage currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={x => setDataSourceInfo(x)}/> : <Navigate to="/" />} />
+          <Route path="*" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/home" />} />
         </Routes>
       </div>
     </div>

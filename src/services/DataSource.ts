@@ -28,6 +28,7 @@ export interface PullRequest {
   author: string;
   repository: Repository;
   link: string;
+  commentsCount: number;
 }
 
 export interface GroupedPullRequest {

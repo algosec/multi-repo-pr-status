@@ -30,7 +30,8 @@ export class BitbucketDataSource implements DataSource {
           name: x.destination.repository.full_name.split("/")[1],
           title: x.destination.repository.name,
           project: x.destination.repository.full_name.split("/")[0]
-        }
+        },
+        commentsCount: x.comment_count,
       };
     });
   }

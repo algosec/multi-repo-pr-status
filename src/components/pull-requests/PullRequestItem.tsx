@@ -1,5 +1,5 @@
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowRight, faClock, faCodeBranch, faUser} from "@fortawesome/free-solid-svg-icons";
+import {faArrowRight, faClock, faCodeBranch, faUser, faComments} from "@fortawesome/free-solid-svg-icons";
 import {faGitAlt, } from "@fortawesome/free-brands-svg-icons";
 import React from "react";
 import './PullRequestsItem.css';
@@ -53,6 +53,9 @@ export function PullRequestItem(props: PullRequestProps) {
           </div>
           <div>
             <FontAwesomeIcon icon={faUser} /> {item.author}
+          </div>
+          <div className="comments-count">
+            <FontAwesomeIcon icon={faComments} /> {item.commentsCount}
           </div>
           <div className={`date ${getActivityColor(item.updated)}`} title={moment(item.updated).format("LLLL")}>
             <FontAwesomeIcon icon={faClock} /> Last update {moment(item.updated).fromNow()}

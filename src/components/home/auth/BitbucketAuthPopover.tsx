@@ -1,21 +1,28 @@
 import * as React from 'react';
 import Popover from '@mui/material/Popover';
 import './BitbucketAuthPopover.css';
+import {useCallback} from "react";
+import type {PopoverOrigin} from "@mui/material/Popover/Popover";
 
 type Props = {
   children: JSX.Element,
 };
 
+const TRANSFORM_ORIGIN: PopoverOrigin = {
+  vertical: 'top',
+  horizontal: 'left',
+};
+
+const ANCHOR_ORIGIN: PopoverOrigin = {
+  vertical: 'bottom',
+  horizontal: 'center',
+};
+
 export function BitbucketAuthPopover({children}: Props) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget), []);
+  const handleClose = useCallback(() => setAnchorEl(null), []);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
@@ -31,14 +38,8 @@ export function BitbucketAuthPopover({children}: Props) {
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
+        anchorOrigin={ANCHOR_ORIGIN}
+        transformOrigin={TRANSFORM_ORIGIN}
       >
         <div className="bb-popover-content">
           <p>

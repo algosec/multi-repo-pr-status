@@ -5,25 +5,17 @@ const UPDATE_INTERVAL = 1000;
 
 interface SyncStatusProps {
   lastUpdate: Moment;
-  isSyncing: boolean;
-  triggerSync: () => Promise<void>;
 }
 
-export function SyncStatus(props: SyncStatusProps) {
-
-  const [lastUpdateSince, setLastUpdateSince] = useState('');
+export const SyncStatus = React.memo(function (props: SyncStatusProps) {
+  const [lastUpdateSince, setLastUpdateSince] = useState(props.lastUpdate.fromNow());
 
   useEffect(() => {
-    function calculateLastUpdateSince(): void {
-      setLastUpdateSince(props.lastUpdate.fromNow());
-    }
-
-    calculateLastUpdateSince();
-    const interval = setInterval(() => calculateLastUpdateSince(), UPDATE_INTERVAL);
+    const interval = setInterval(() => setLastUpdateSince(props.lastUpdate.fromNow()), UPDATE_INTERVAL);
     return () => clearInterval(interval);
-  });
+  }, [props.lastUpdate]);
 
   return (
       <span>Last update {lastUpdateSince}</span>
   );
-}
+});

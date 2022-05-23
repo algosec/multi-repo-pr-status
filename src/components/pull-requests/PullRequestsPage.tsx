@@ -1,9 +1,13 @@
-import React from "react";
+import React, {ChangeEvent, useCallback} from "react";
 import {PullRequestItem} from "./PullRequestItem";
 import './PullRequestsPage.css';
 import {GroupedPullRequest} from "../../services/DataSource";
 import { MultiSelect } from "react-multi-select-component";
 import useLocalStorage from "use-local-storage";
+
+const OVERRIDE_STRINGS_PROJECT = {"selectSomeItems": "Search project"};
+const OVERRIDE_STRINGS_AUTHOR = {"selectSomeItems": "Search author"};
+const OVERRIDE_STRINGS_REPOSITORY = {"selectSomeItems": "Search repository"};
 
 interface PullRequestPanelProps {
   groupedPullRequests: GroupedPullRequest[];
@@ -32,6 +36,9 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
   const authorsList: Option[] = extractAuthors(props.groupedPullRequests)
     .map(x => {return {label: x, value: x}});
 
+
+  const updateSearchFilter = useCallback((e: ChangeEvent<HTMLInputElement>) => setSearchFilter(e.target.value), [setSearchFilter]);
+
   function isInFilter(item: GroupedPullRequest): boolean {
     const textFilterResult: boolean = searchFilter === '' || item.source.includes(searchFilter) || item.source.includes(searchFilter);
     const authorFilterResult: boolean = selectedAuthors.length === 0 || item.pullRequests.some(x => selectedAuthors.includes(x.author));
@@ -51,14 +58,14 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
 
   return <div>
     <div className="filters">
-      <input placeholder={`Search ${props.groupedPullRequests.length} items...`} value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)}  className="search-filter"/>
+      <input placeholder={`Search ${props.groupedPullRequests.length} items...`} value={searchFilter} onChange={updateSearchFilter}  className="search-filter"/>
       <MultiSelect
         options={projectList}
         value={projectFilter}
         onChange={setProjectFilter}
         labelledBy="project-filter"
         hasSelectAll={false}
-        overrideStrings={{"selectSomeItems": "Search project"}}
+        overrideStrings={OVERRIDE_STRINGS_PROJECT}
         className="filter-multi-select"
       />
       <MultiSelect
@@ -67,7 +74,7 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
         onChange={setRepositoryFilter}
         labelledBy="repository-filter"
         hasSelectAll={false}
-        overrideStrings={{"selectSomeItems": "Search repository"}}
+        overrideStrings={OVERRIDE_STRINGS_REPOSITORY}
         className="filter-multi-select"
       />
       <MultiSelect
@@ -76,7 +83,7 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
         onChange={setAuthorFilter}
         labelledBy="author-filter"
         hasSelectAll={false}
-        overrideStrings={{"selectSomeItems": "Search author"}}
+        overrideStrings={OVERRIDE_STRINGS_AUTHOR}
         className="filter-multi-select"
       />
     </div>

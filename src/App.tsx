@@ -20,10 +20,18 @@ function App() {
   const [dataSourceInfo, setDataSourceInfo] = useLocalStorage<DataSourceInfo|undefined>('data-source', undefined);
   const dataSource = useMemo<DataSource|undefined>(() => dataSourceInfo && generateDataSource(dataSourceInfo), [dataSourceInfo]);
 
-  function disconnect(): void {
+  const disconnect = useCallback(() => {
     setDataSourceInfo(undefined);
     localStorage.clear();
-  }
+  }, [setDataSourceInfo]);
+
+  const homepage = useMemo(() => {
+    return !dataSourceInfo ? <HomePage currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={setDataSourceInfo}/> : <Navigate to="/" />;
+  }, [dataSourceInfo, setDataSourceInfo]);
+
+  const appWithDataSource = useMemo(() => {
+    return dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/home" />;
+  }, [dataSource, dataSourceInfo, disconnect]);
 
   return (
     <div>
@@ -33,8 +41,8 @@ function App() {
       </header>
       <div className="App-body">
         <Routes>
-          <Route path="/home" element={!dataSourceInfo ? <HomePage currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={x => setDataSourceInfo(x)}/> : <Navigate to="/" />} />
-          <Route path="*" element={dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/home" />} />
+          <Route path="/home" element={homepage} />
+          <Route path="*" element={appWithDataSource} />
         </Routes>
       </div>
     </div>
@@ -104,11 +112,11 @@ function AppWithDataSource(props: AppWithDataSourceProps) {
     <div>
       <div className="Sub-header">
         <div>
-          <DataSourceHeader dataSourceInfo={props.dataSourceInfo} /> (<SyncStatus key={lastUpdate.valueOf()} lastUpdate={lastUpdate} isSyncing={isLoading} triggerSync={() => triggerSync()} />)
+          <DataSourceHeader dataSourceInfo={props.dataSourceInfo} /> (<SyncStatus lastUpdate={lastUpdate} />)
         </div>
         <div className="align-right">
           <button onClick={triggerSync} className="link-button"><FontAwesomeIcon icon={faSync} spin={isLoading}/> Sync</button>
-          <button className="link-button margin-left" onClick={() => props.disconnect()}><FontAwesomeIcon icon={faRightFromBracket}/> Disconnect</button>
+          <button className="link-button margin-left" onClick={props.disconnect}><FontAwesomeIcon icon={faRightFromBracket}/> Disconnect</button>
         </div>
       </div>
       <Routes>

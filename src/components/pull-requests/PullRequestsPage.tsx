@@ -40,7 +40,7 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
   const updateSearchFilter = useCallback((e: ChangeEvent<HTMLInputElement>) => setSearchFilter(e.target.value), [setSearchFilter]);
 
   function isInFilter(item: GroupedPullRequest): boolean {
-    const textFilterResult: boolean = searchFilter === '' || item.source.includes(searchFilter) || item.source.includes(searchFilter);
+    const textFilterResult: boolean = searchFilter === '' || item.source.includes(searchFilter) || item.destination.includes(searchFilter) || item.pullRequests.some(pr => pr.title.includes(searchFilter));
     const authorFilterResult: boolean = selectedAuthors.length === 0 || item.pullRequests.some(x => selectedAuthors.includes(x.author));
     const projectFilterResult: boolean = selectedProject.length === 0 || item.pullRequests.some(x => selectedProject.includes(x.repository.project));
     const repositoryFilterResult: boolean = selectedRepository.length === 0 || item.pullRequests.some(x => selectedRepository.includes(x.repository.name));

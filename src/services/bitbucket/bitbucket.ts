@@ -72,12 +72,7 @@ export class BitbucketDataSource implements DataSource {
   }
 
   private async fetchUser(): Promise<BitbucketUser> {
-    const url = `https://api.bitbucket.org/2.0/user`;
-    const response = await axios.get<BitbucketUser>(url, {
-      auth: this.cred
-    });
-
-    return response.data;
+    return this.sendRequest<BitbucketUser>(`https://api.bitbucket.org/2.0/user`);
   }
 
   private async fetchPaginatedItems<T>(url: string): Promise<T[]> {
@@ -90,18 +85,21 @@ export class BitbucketDataSource implements DataSource {
     url = `${url}?pagelen=50`;
 
     while (url != null) {
-      console.log(`REST CALL: ${url}`);
-      const response = await axios.get<Paginate<T>>(url, {
-        auth: this.cred
-      });
-
-      const data: Paginate<T> = response.data;
+      const data = await this.sendRequest<Paginate<T>>(url);
 
       list.push(...data.values);
       url = data.next;
     }
 
     return list;
+  }
+
+  private async sendRequest<T>(url: string): Promise<T> {
+    console.log(`REST CALL: ${url}`);
+    const response = await axios.get<T>(url, {
+      auth: this.cred
+    });
+    return response.data;
   }
 
   private async fetchInParallel<T>(urls: string[]): Promise<T[]> {

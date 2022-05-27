@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import {dataSourceInfoReducer} from './dataSourceInfo.slice';
 import {useDispatch, useSelector} from "react-redux";
 import type {TypedUseSelectorHook} from "react-redux";
-import {remoteDataReducer} from "./remoteData.slice";
+import {remoteDataReducer, updateIsLoading} from "./remoteData.slice";
 import {loadState, saveState} from "./storage";
 import {debounce} from "debounce";
 import {clearStateAction} from "./shared-actions";
@@ -16,6 +16,10 @@ export const store = configureStore({
   },
   preloadedState: loadState(STORAGE_KEY),
 });
+
+// this is in order to prevent cases when the page is refresh during sync,
+// so we will have incorrect state (isLoading=true although it isn't)
+store.dispatch(updateIsLoading(false));
 
 // here we subscribe to the store changes to persist to storage
 store.subscribe(

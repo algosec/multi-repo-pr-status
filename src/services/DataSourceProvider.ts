@@ -9,7 +9,7 @@ export interface DataSourceInfo {
 }
 
 export function generateDataSource(info: DataSourceInfo): DataSource {
-  console.log(`generate data source ${info.type}`);
+  console.debug(`generate data source ${info.type}`);
 
   switch (info.type) {
     case "Bitbucket": return new BitbucketDataSource(info.credentials);

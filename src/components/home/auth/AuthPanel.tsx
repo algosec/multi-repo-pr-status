@@ -5,13 +5,12 @@ import {DataSourceInfo, generateDataSource} from "../../../services/DataSourcePr
 import {useNavigate} from "react-router-dom";
 import './AuthPanel.css';
 import {BitbucketAuthPopover} from "./BitbucketAuthPopover";
+import {useAppDispatch} from "../../../state/store";
+import {updateDataSourceInfo} from "../../../state/dataSourceInfo.slice";
 
-interface AuthPanelProps {
-  currentDataSourceInfo?: DataSourceInfo;
-  updateDataSourceInfo: (dataSourceInfo: DataSourceInfo) => void;
-}
+export function AuthPanel() {
 
-export function AuthPanel(props: AuthPanelProps) {
+  const dispatch = useAppDispatch();
 
   const [user, setUser] = useState<string>('');
   const [pass, setPass] = useState<string>('');
@@ -45,7 +44,7 @@ export function AuthPanel(props: AuthPanelProps) {
       return;
     }
 
-    props.updateDataSourceInfo(dataSourceInfo);
+    dispatch(updateDataSourceInfo(dataSourceInfo));
     navigate('/');
   }
 

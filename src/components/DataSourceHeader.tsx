@@ -7,7 +7,7 @@ interface DataSourceHeaderProps {
   dataSourceInfo: DataSourceInfo;
 }
 
-export function DataSourceHeader(props: DataSourceHeaderProps) {
+export const DataSourceHeader = React.memo((props: DataSourceHeaderProps) => {
 
   function getDataSourceIcon() {
     switch (props.dataSourceInfo.type) {
@@ -21,4 +21,4 @@ export function DataSourceHeader(props: DataSourceHeaderProps) {
       Connected to <b><FontAwesomeIcon icon={getDataSourceIcon()} /> {props.dataSourceInfo.type}</b> as <b>{props.dataSourceInfo.credentials.username}</b>
     </span>
   );
-}
+});

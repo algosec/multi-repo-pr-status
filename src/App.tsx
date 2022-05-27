@@ -2,36 +2,26 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faSync, faCodePullRequest, faRightFromBracket} from '@fortawesome/free-solid-svg-icons';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import './App.css';
-import useLocalStorage from "use-local-storage";
 import {PullRequestsPage} from "./components/pull-requests/PullRequestsPage";
 import {Link, Navigate, Route, Routes} from "react-router-dom";
-import {DataSource, GroupedPullRequest, PullRequest} from "./services/DataSource";
-import {groupPullRequests} from "./services/logic";
+import {DataSource} from "./services/DataSource";
 import {DataSourceInfo, generateDataSource} from "./services/DataSourceProvider";
-import moment from "moment";
 import {ContributeLink} from "./components/ContributeLink";
 import {DataSourceHeader} from "./components/DataSourceHeader";
 import {InitialSyncIndicator} from "./components/InitialSyncIndicator";
 import {SyncStatus} from "./components/pull-requests/SyncStatus";
 import {Moment} from "moment/moment";
 import {HomePage} from "./components/home/HomePage";
+import {clearStore, useAppDispatch, useAppSelector} from "./state/store";
+import {hasDataSourceInfo, selectDataSourceInfo} from "./state/dataSourceInfo.slice";
+import {EMPTY_TIME, selectLastUpdate, updatePullRequests} from "./state/remoteData.slice";
 
 function App() {
-  const [dataSourceInfo, setDataSourceInfo] = useLocalStorage<DataSourceInfo|undefined>('data-source', undefined);
-  const dataSource = useMemo<DataSource|undefined>(() => dataSourceInfo && generateDataSource(dataSourceInfo), [dataSourceInfo]);
 
-  const disconnect = useCallback(() => {
-    setDataSourceInfo(undefined);
-    localStorage.clear();
-  }, [setDataSourceInfo]);
+  const isConnected = useAppSelector<boolean>(hasDataSourceInfo);
 
-  const homepage = useMemo(() => {
-    return !dataSourceInfo ? <HomePage currentDataSourceInfo={dataSourceInfo} updateDataSourceInfo={setDataSourceInfo}/> : <Navigate to="/" />;
-  }, [dataSourceInfo, setDataSourceInfo]);
-
-  const appWithDataSource = useMemo(() => {
-    return dataSource && dataSourceInfo ? <AppWithDataSource dataSource={dataSource} dataSourceInfo={dataSourceInfo} disconnect={disconnect} /> : <Navigate to="/home" />;
-  }, [dataSource, dataSourceInfo, disconnect]);
+  const homepage = useMemo(() => !isConnected ? <HomePage /> : <Navigate to="/" />, [isConnected]);
+  const appWithDataSource = useMemo(() => isConnected ? <AppWithDataSource /> : <Navigate to="/home" />,[isConnected]);
 
   return (
     <div>
@@ -49,35 +39,25 @@ function App() {
   );
 }
 
-const momentSerializer = {
-  serializer: (obj: Moment | undefined) => obj?.valueOf()?.toString() || "undefined",
-  parser: (str: string) => str === "undefined" ? undefined : moment(parseInt(str)),
-};
+function AppWithDataSource() {
 
-interface AppWithDataSourceProps {
-  dataSource: DataSource;
-  dataSourceInfo: DataSourceInfo;
-  disconnect: () => void;
-}
+  const dispatch = useAppDispatch();
 
-function AppWithDataSource(props: AppWithDataSourceProps) {
-  const [lastUpdate, setLastUpdate] = useLocalStorage<Moment|undefined>('pull-requests-last-update', undefined, momentSerializer);
-  const [pullRequests, setPullRequests] = useLocalStorage<PullRequest[]>('pull-requests', []);
+  const dataSourceInfo = useAppSelector<DataSourceInfo>(selectDataSourceInfo);
+  const dataSource = useMemo<DataSource>(() => generateDataSource(dataSourceInfo), [dataSourceInfo]);
 
-  const groupedPullRequests: GroupedPullRequest[] = groupPullRequests(pullRequests);
+  const lastUpdate = useAppSelector<Moment>(selectLastUpdate);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const sync: () => Promise<void> = useCallback(async () => {
-    const syncTitle = `Sync with ${props.dataSource.getType()}`;
+    const syncTitle = `Sync with ${dataSource.getType()}`;
     try {
       console.time(syncTitle);
       console.groupCollapsed(syncTitle);
-      const startDate = moment();
-      const repositories = await props.dataSource.getRepositories();
-      const list = await props.dataSource.getPullRequests(repositories);
-      setPullRequests(list);
-      setLastUpdate(startDate);
+      const repositories = await dataSource.getRepositories();
+      const list = await dataSource.getPullRequests(repositories);
+      dispatch(updatePullRequests(list));
     } catch (err) {
       console.error('Got error', err);
     } finally {
@@ -85,7 +65,7 @@ function AppWithDataSource(props: AppWithDataSourceProps) {
       console.timeEnd(syncTitle);
       setIsLoading(false);
     }
-  }, [props.dataSource, setLastUpdate, setPullRequests]);
+  }, [dataSource, dispatch]);
 
   const triggerSync: () => Promise<void> = useCallback(async () => {
     if (isLoading) {
@@ -96,15 +76,13 @@ function AppWithDataSource(props: AppWithDataSourceProps) {
     setTimeout(() => sync(), 1);
   }, [isLoading, sync]);
 
-
   useEffect(() => {
-    if (!lastUpdate) {
+    if (lastUpdate.isSame(EMPTY_TIME)) {
       triggerSync();
     }
-  }, [props.dataSourceInfo, lastUpdate, triggerSync]);
+  }, [lastUpdate, triggerSync]);
 
-
-  if (!lastUpdate) {
+  if (lastUpdate.isSame(EMPTY_TIME)) {
     return <InitialSyncIndicator />;
   }
 
@@ -112,15 +90,15 @@ function AppWithDataSource(props: AppWithDataSourceProps) {
     <div>
       <div className="Sub-header">
         <div>
-          <DataSourceHeader dataSourceInfo={props.dataSourceInfo} /> (<SyncStatus lastUpdate={lastUpdate} />)
+          <DataSourceHeader dataSourceInfo={dataSourceInfo} /> (<SyncStatus lastUpdate={lastUpdate} />)
         </div>
         <div className="align-right">
           <button onClick={triggerSync} className="link-button"><FontAwesomeIcon icon={faSync} spin={isLoading}/> Sync</button>
-          <button className="link-button margin-left" onClick={props.disconnect}><FontAwesomeIcon icon={faRightFromBracket}/> Disconnect</button>
+          <button className="link-button margin-left" onClick={clearStore}><FontAwesomeIcon icon={faRightFromBracket}/> Disconnect</button>
         </div>
       </div>
       <Routes>
-        <Route path="/" element={<PullRequestsPage groupedPullRequests={groupedPullRequests} />} />
+        <Route path="/" element={<PullRequestsPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

@@ -1,20 +1,24 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faSync, faCodePullRequest, faRightFromBracket} from '@fortawesome/free-solid-svg-icons';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo} from 'react';
 import './App.css';
 import {PullRequestsPage} from "./components/pull-requests/PullRequestsPage";
 import {Link, Navigate, Route, Routes} from "react-router-dom";
-import {DataSource} from "./services/DataSource";
-import {DataSourceInfo, generateDataSource} from "./services/DataSourceProvider";
+import {DataSourceInfo} from "./services/DataSourceProvider";
 import {ContributeLink} from "./components/ContributeLink";
 import {DataSourceHeader} from "./components/DataSourceHeader";
 import {InitialSyncIndicator} from "./components/InitialSyncIndicator";
 import {SyncStatus} from "./components/pull-requests/SyncStatus";
 import {Moment} from "moment/moment";
 import {HomePage} from "./components/home/HomePage";
-import {clearStore, useAppDispatch, useAppSelector} from "./state/store";
+import {clearStore, useAppSelector} from "./state/store";
 import {hasDataSourceInfo, selectDataSourceInfo} from "./state/dataSourceInfo.slice";
-import {EMPTY_TIME, selectLastUpdate, updatePullRequests} from "./state/remoteData.slice";
+import {
+  EMPTY_TIME,
+  selectIsLoading,
+  selectLastUpdate
+} from "./state/remoteData.slice";
+import {DataSourceLoader} from "./services/DataSourceLoader";
 
 function App() {
 
@@ -41,46 +45,18 @@ function App() {
 
 function AppWithDataSource() {
 
-  const dispatch = useAppDispatch();
-
   const dataSourceInfo = useAppSelector<DataSourceInfo>(selectDataSourceInfo);
-  const dataSource = useMemo<DataSource>(() => generateDataSource(dataSourceInfo), [dataSourceInfo]);
+  const dataSourceLoader = useMemo<DataSourceLoader>(() => new DataSourceLoader(dataSourceInfo), [dataSourceInfo]);
 
   const lastUpdate = useAppSelector<Moment>(selectLastUpdate);
+  const isLoading = useAppSelector<boolean>(selectIsLoading);
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const sync: () => Promise<void> = useCallback(async () => {
-    const syncTitle = `Sync with ${dataSource.getType()}`;
-    try {
-      console.time(syncTitle);
-      console.groupCollapsed(syncTitle);
-      const repositories = await dataSource.getRepositories();
-      const list = await dataSource.getPullRequests(repositories);
-      dispatch(updatePullRequests(list));
-    } catch (err) {
-      console.error('Got error', err);
-    } finally {
-      console.groupEnd();
-      console.timeEnd(syncTitle);
-      setIsLoading(false);
-    }
-  }, [dataSource, dispatch]);
-
-  const triggerSync: () => Promise<void> = useCallback(async () => {
-    if (isLoading) {
-      return;
-    }
-
-    setIsLoading(true);
-    setTimeout(() => sync(), 1);
-  }, [isLoading, sync]);
+  const triggerSync = useCallback(() => dataSourceLoader.reload(), [dataSourceLoader]);
 
   useEffect(() => {
-    if (lastUpdate.isSame(EMPTY_TIME)) {
-      triggerSync();
-    }
-  }, [lastUpdate, triggerSync]);
+    dataSourceLoader.init();
+    return () => dataSourceLoader.destroy()
+  }, [dataSourceLoader]);
 
   if (lastUpdate.isSame(EMPTY_TIME)) {
     return <InitialSyncIndicator />;

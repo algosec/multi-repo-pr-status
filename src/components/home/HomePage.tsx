@@ -1,20 +1,15 @@
 import {AuthPanel} from "./auth/AuthPanel";
-import {DataSourceInfo} from "../../services/DataSourceProvider";
 import './HomePage.css';
 import {faFileShield, faArrowsToEye, faWandMagicSparkles} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
 
-interface HomePageProps {
-  currentDataSourceInfo?: DataSourceInfo;
-  updateDataSourceInfo: (dataSourceInfo: DataSourceInfo) => void;
-}
+export function HomePage() {
 
-export function HomePage(props: HomePageProps) {
   return (
     <div>
       <div className="Sub-header">
-        <AuthPanel updateDataSourceInfo={props.updateDataSourceInfo} currentDataSourceInfo={props.currentDataSourceInfo} />
+        <AuthPanel />
       </div>
       <div className="box-holder">
           <div className="box">

@@ -8,7 +8,7 @@ export interface DataSourceInfo {
   credentials: Credentials;
 }
 
-export function generateDataSource(info: DataSourceInfo): DataSource  {
+export function generateDataSource(info: DataSourceInfo): DataSource {
   console.log(`generate data source ${info.type}`);
 
   switch (info.type) {

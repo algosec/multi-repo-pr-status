@@ -1,19 +1,21 @@
-import React, {ChangeEvent, useCallback} from "react";
+import React, {ChangeEvent, useCallback, useMemo} from "react";
 import {PullRequestItem} from "./PullRequestItem";
 import './PullRequestsPage.css';
-import {GroupedPullRequest} from "../../services/DataSource";
+import {GroupedPullRequest, PullRequest} from "../../services/DataSource";
 import { MultiSelect } from "react-multi-select-component";
 import useLocalStorage from "use-local-storage";
+import {groupPullRequests} from "../../services/logic";
+import {useAppSelector} from "../../state/store";
+import {selectPullRequests} from "../../state/remoteData.slice";
 
 const OVERRIDE_STRINGS_PROJECT = {"selectSomeItems": "Search project"};
 const OVERRIDE_STRINGS_AUTHOR = {"selectSomeItems": "Search author"};
 const OVERRIDE_STRINGS_REPOSITORY = {"selectSomeItems": "Search repository"};
 
-interface PullRequestPanelProps {
-  groupedPullRequests: GroupedPullRequest[];
-}
+export function PullRequestsPage() {
 
-export function PullRequestsPage(props: PullRequestPanelProps) {
+  const pullRequests = useAppSelector<PullRequest[]>(selectPullRequests);
+  const groupedPullRequests: GroupedPullRequest[] = useMemo(() => groupPullRequests(pullRequests), [pullRequests]);
 
   // free text filter
   const [searchFilter, setSearchFilter] = useLocalStorage("filter-free-text", "");
@@ -21,19 +23,19 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
   // project multi-select filter
   const [projectFilter, setProjectFilter] = useLocalStorage<Option[]>("filter-project", []);
   const selectedProject = projectFilter.map(x => x.value);
-  const projectList: Option[] = extractProjects(props.groupedPullRequests)
+  const projectList: Option[] = extractProjects(groupedPullRequests)
     .map(x => {return {label: x, value: x}});
 
   // repository multi-select filter
   const [repositoryFilter, setRepositoryFilter] = useLocalStorage<Option[]>("filter-repository", []);
   const selectedRepository = repositoryFilter.map(x => x.value);
-  const repositoryList: Option[] = extractRepositories(props.groupedPullRequests, selectedProject)
+  const repositoryList: Option[] = extractRepositories(groupedPullRequests, selectedProject)
     .map(x => {return {label: x, value: x}});
 
   // author multi-select filter
   const [authorFilter, setAuthorFilter] = useLocalStorage<Option[]>("filter-author", []);
   const selectedAuthors = authorFilter.map(x => x.value);
-  const authorsList: Option[] = extractAuthors(props.groupedPullRequests)
+  const authorsList: Option[] = extractAuthors(groupedPullRequests)
     .map(x => {return {label: x, value: x}});
 
 
@@ -52,13 +54,13 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
     ;
   }
 
-  if (props.groupedPullRequests.length === 0) {
+  if (groupedPullRequests.length === 0) {
     return <div>No information available</div>;
   }
 
   return <div>
     <div className="filters">
-      <input placeholder={`Search ${props.groupedPullRequests.length} items...`} value={searchFilter} onChange={updateSearchFilter}  className="search-filter"/>
+      <input placeholder={`Search ${groupedPullRequests.length} items...`} value={searchFilter} onChange={updateSearchFilter}  className="search-filter"/>
       <MultiSelect
         options={projectList}
         value={projectFilter}
@@ -87,7 +89,7 @@ export function PullRequestsPage(props: PullRequestPanelProps) {
         className="filter-multi-select"
       />
     </div>
-    {props.groupedPullRequests
+    {groupedPullRequests
       .filter(item => isInFilter(item))
       .map(item => (
         <PullRequestItem key={`${item.source}__${item.destination}`} data={item}/>

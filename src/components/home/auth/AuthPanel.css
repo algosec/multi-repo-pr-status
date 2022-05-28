@@ -1,13 +1,37 @@
-.auth-row *:not(:last-child) {
+.auth-row {
+    display: flex;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.auth-row > .title {
+    width: 225px;
+}
+.auth-row > .section {
+    width: 275px;
+}
+.auth-row > .info {
+    flex: 1;
+    color: #7D8BA1;
+    display: flex;
+    align-items: center;
+    line-height: 1.5em;
+}
+.auth-row > .info > .info-icon {
     margin-right: 10px;
 }
 
 .error-message {
     color: red;
+    padding-left: 25px;
 }
 
 .auth-row input {
     border-radius: 3px;
     border: 1px #7D8BA1 solid;
-    padding: 3px 6px;
+    padding: 6px 12px;
+}
+
+.data-source-type {
+    margin-right: 15px;
 }

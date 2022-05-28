@@ -7,9 +7,11 @@ import React from "react";
 export function HomePage() {
 
   return (
-    <div>
-      <div className="Sub-header">
-        <AuthPanel />
+    <div className="home-page">
+      <div className="box-holder">
+        <div className="box">
+          <AuthPanel />
+        </div>
       </div>
       <div className="box-holder">
           <div className="box">

@@ -3,6 +3,8 @@ import {Credentials, DataSource} from "./DataSource";
 
 export type DataSourceType = 'Bitbucket';
 
+export const DATA_SOURCE_TYPES: DataSourceType[] = ['Bitbucket'];
+
 export interface DataSourceInfo {
   type: DataSourceType;
   credentials: Credentials;

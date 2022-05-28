@@ -7,7 +7,7 @@ interface SyncStatusProps {
   lastUpdate: Moment;
 }
 
-export const SyncStatus = React.memo(function (props: SyncStatusProps) {
+export const SyncStatus = React.memo((props: SyncStatusProps) => {
   const [lastUpdateSince, setLastUpdateSince] = useState(props.lastUpdate.fromNow());
 
   useEffect(() => {

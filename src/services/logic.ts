@@ -16,8 +16,6 @@ export function groupPullRequests(pullRequests: PullRequest[], branches: Branch[
     list.push(branch);
   });
 
-  console.log(branchesMap);
-
   pullRequests.forEach(pullRequest => {
     const source = pullRequest.source;
     const dest = pullRequest.destination;

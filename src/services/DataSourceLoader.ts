@@ -4,11 +4,12 @@ import {
   updateIsLoading,
   selectIsLoading,
   selectLastUpdate,
-  updatePullRequests
+  updateData, selectIsDataWithLatestVersion
 } from "../state/remoteData.slice";
 import {store} from "../state/store";
 import moment, {Moment} from "moment/moment";
 import {DataSourceInfo, generateDataSource} from "./DataSourceProvider";
+import {groupPullRequests} from "./logic";
 
 const SYNC_INTERVAL_SECONDS = 15 * 60;
 
@@ -27,6 +28,12 @@ export class DataSourceLoader {
 
     if (lastUpdate.isSame(EMPTY_TIME)) {
       console.debug(`first time sync`);
+      this.reload();
+      return;
+    }
+
+    if (!selectIsDataWithLatestVersion(store.getState())) {
+      console.debug(`reloading since data is not latest version`);
       this.reload();
       return;
     }
@@ -66,11 +73,14 @@ export class DataSourceLoader {
     const syncTitle = `Sync with ${this.dataSource.getType()}`;
     try {
       console.time(syncTitle);
+      console.log(`${syncTitle} started`);
       const repositories = await this.dataSource.getRepositories();
-      const list = await this.dataSource.getPullRequests(repositories);
-      store.dispatch(updatePullRequests(list));
+      const pullRequests = await this.dataSource.getPullRequests(repositories);
+      const branches = await this.dataSource.getBranches(repositories);
+      const data = groupPullRequests(pullRequests, branches);
+      store.dispatch(updateData(data));
     } catch (err) {
-      console.error('Got error', err);
+      console.error(`${syncTitle} got error`, err);
     } finally {
       console.timeEnd(syncTitle);
       this.scheduleNextReload(SYNC_INTERVAL_SECONDS);

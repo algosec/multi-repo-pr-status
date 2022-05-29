@@ -8,7 +8,7 @@ export interface BitBucketLink {
 }
 
 export interface BitbucketWorkspace {
-  created_on: Date;
+  created_on: string;
   is_private: boolean;
   links: BitBucketObjectLinks;
   name: string;
@@ -34,18 +34,18 @@ export interface Paginate<T> {
 export interface BitbucketPullRequest {
   title: string;
   links: BitBucketObjectLinks;
-  created_on: Date;
-  updated_on: Date;
+  created_on: string;
+  updated_on: string;
   state: BitbucketPullRequestState;
-  source: BitbucketBranch;
-  destination: BitbucketBranch;
+  source: BitbucketPullRequestBranch;
+  destination: BitbucketPullRequestBranch;
   comment_count: number;
   task_count: number;
   author: { display_name: string };
 }
 
-export interface BitbucketBranch {
-  commit: {
+export interface BitbucketPullRequestBranch {
+  commit?: {
     hash: BitbucketCommitHash;
   };
   repository: {
@@ -54,6 +54,18 @@ export interface BitbucketBranch {
   };
   branch: {
     name: string;
+  }
+}
+
+export interface BitbucketBranch {
+  name: string;
+  links: BitBucketObjectLinks;
+  target: {
+    hash: string;
+    repository: {
+      name: string;
+      full_name: string;
+    }
   }
 }
 

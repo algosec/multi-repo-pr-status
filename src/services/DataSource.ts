@@ -1,11 +1,10 @@
-import {DataSourceType} from "./DataSourceProvider";
-
 export interface DataSource {
   getType(): string;
   fetchUserDisplayName(): Promise<string>;
   validateCredentials(): Promise<string|null>;
   getRepositories(): Promise<Repository[]>;
   getPullRequests(repos: Repository[]): Promise<PullRequest[]>;
+  getBranches(repos: Repository[]): Promise<Branch[]>;
 }
 
 export interface Credentials {
@@ -23,26 +22,27 @@ export interface PullRequest {
   source: string;
   destination: string;
   title: string;
-  created: Date;
-  updated: Date;
+  created: string;
+  updated: string;
   author: string;
   repository: Repository;
   link: string;
   commentsCount: number;
+  hash: string;
 }
 
 export interface GroupedPullRequest {
   source: string;
   destination: string;
   pullRequests: PullRequest[];
-  created: Date;
-  updated: Date;
+  created: string;
+  updated: string;
+  sourceBranchesWithoutPullRequest: Branch[];
 }
 
-export interface Settings {
-  datasource: {
-    type: DataSourceType;
-    credentials: Credentials;
-  }
-  repositories: Repository[]
+export interface Branch {
+  name: string;
+  hash: string;
+  repository: Repository;
+  link: string;
 }

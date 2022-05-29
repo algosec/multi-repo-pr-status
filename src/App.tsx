@@ -14,7 +14,7 @@ import {HomePage} from "./components/home/HomePage";
 import {clearStore, useAppSelector} from "./state/store";
 import {hasDataSourceInfo, selectDataSourceInfo} from "./state/dataSourceInfo.slice";
 import {
-  EMPTY_TIME,
+  EMPTY_TIME, selectIsDataWithLatestVersion,
   selectIsLoading,
   selectLastUpdate
 } from "./state/remoteData.slice";
@@ -48,6 +48,8 @@ function AppWithDataSource() {
   const dataSourceInfo = useAppSelector<DataSourceInfo>(selectDataSourceInfo);
   const dataSourceLoader = useMemo<DataSourceLoader>(() => new DataSourceLoader(dataSourceInfo), [dataSourceInfo]);
 
+  const isDataWithLatestVersion = useAppSelector<boolean>(selectIsDataWithLatestVersion);
+
   const lastUpdate = useAppSelector<Moment>(selectLastUpdate);
   const isLoading = useAppSelector<boolean>(selectIsLoading);
 
@@ -58,8 +60,8 @@ function AppWithDataSource() {
     return () => dataSourceLoader.destroy()
   }, [dataSourceLoader]);
 
-  if (lastUpdate.isSame(EMPTY_TIME)) {
-    return <InitialSyncIndicator />;
+  if (lastUpdate.isSame(EMPTY_TIME) || !isDataWithLatestVersion) {
+    return <InitialSyncIndicator isLoading={isLoading} />;
   }
 
   return (

@@ -1,12 +1,11 @@
-import React, {ChangeEvent, useCallback, useMemo} from "react";
+import React, {ChangeEvent, useCallback} from "react";
 import {PullRequestItem} from "./PullRequestItem";
 import './PullRequestsPage.css';
-import {GroupedPullRequest, PullRequest} from "../../services/DataSource";
+import {GroupedPullRequest} from "../../services/DataSource";
 import { MultiSelect } from "react-multi-select-component";
 import useLocalStorage from "use-local-storage";
-import {groupPullRequests} from "../../services/logic";
 import {useAppSelector} from "../../state/store";
-import {selectPullRequests} from "../../state/remoteData.slice";
+import {selectData} from "../../state/remoteData.slice";
 
 const OVERRIDE_STRINGS_PROJECT = {"selectSomeItems": "Search project"};
 const OVERRIDE_STRINGS_AUTHOR = {"selectSomeItems": "Search author"};
@@ -14,8 +13,7 @@ const OVERRIDE_STRINGS_REPOSITORY = {"selectSomeItems": "Search repository"};
 
 export function PullRequestsPage() {
 
-  const pullRequests = useAppSelector<PullRequest[]>(selectPullRequests);
-  const groupedPullRequests: GroupedPullRequest[] = useMemo(() => groupPullRequests(pullRequests), [pullRequests]);
+  const groupedPullRequests = useAppSelector<GroupedPullRequest[]>(selectData);
 
   // free text filter
   const [searchFilter, setSearchFilter] = useLocalStorage("filter-free-text", "");

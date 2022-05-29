@@ -1,10 +1,10 @@
 import axios, {AxiosError} from "axios";
-import {Credentials, DataSource, PullRequest, Repository} from "../DataSource";
+import {Branch, Credentials, DataSource, PullRequest, Repository} from "../DataSource";
 import {DataSourceType} from "../DataSourceProvider";
 import {
   BitbucketPullRequest,
   BitbucketRepository, BitbucketUser, BitbucketWorkspace,
-  Paginate
+  Paginate, BitbucketBranch
 } from "./bitbucket.model";
 
 export class BitbucketDataSource implements DataSource {
@@ -17,6 +17,7 @@ export class BitbucketDataSource implements DataSource {
 
   public async getPullRequests(repos: Repository[]): Promise<PullRequest[]> {
     const pullRequests = await this.fetchOpenPullRequests(repos);
+
     return pullRequests.map(x => {
       return {
         title: x.title,
@@ -32,7 +33,24 @@ export class BitbucketDataSource implements DataSource {
           project: x.destination.repository.full_name.split("/")[0]
         },
         commentsCount: x.comment_count,
+        hash: x.source.commit?.hash || 'unknown'
       };
+    });
+  }
+
+  public async getBranches(repos: Repository[]): Promise<Branch[]> {
+    const branches = await this.fetchBranches(repos);
+    return branches.map(x => {
+      return {
+        name: x.name,
+        hash: x.target.hash,
+        link: x.links.html.href,
+        repository: {
+          name: x.target.repository.full_name.split("/")[1],
+          title: x.target.repository.name,
+          project: x.target.repository.full_name.split("/")[0]
+        },
+      }
     });
   }
 
@@ -75,14 +93,14 @@ export class BitbucketDataSource implements DataSource {
     return this.sendRequest<BitbucketUser>(`https://api.bitbucket.org/2.0/user`);
   }
 
-  private async fetchPaginatedItems<T>(url: string): Promise<T[]> {
+  private async fetchPaginatedItems<T>(url: string, pagelen = 50): Promise<T[]> {
     if (!this.cred) {
       throw Error("missing credentials");
     }
 
     const list: T[] = [];
 
-    url = `${url}?pagelen=50`;
+    url = `${url}?pagelen=${pagelen}`;
 
     while (url != null) {
       const data = await this.sendRequest<Paginate<T>>(url);
@@ -95,19 +113,18 @@ export class BitbucketDataSource implements DataSource {
   }
 
   private async sendRequest<T>(url: string): Promise<T> {
-    console.log(`REST CALL: ${url}`);
+    console.debug(`REST CALL: ${url}`);
     const response = await axios.get<T>(url, {
       auth: this.cred
     });
     return response.data;
   }
 
-  private async fetchInParallel<T>(urls: string[]): Promise<T[]> {
+  private async fetchInParallel<T>(urls: string[], pagelen?: number): Promise<T[]> {
     const list: Promise<T[]>[] = [];
 
     for (const url of urls) {
-      console.log(`Fetching ${url}`);
-      list.push(this.fetchPaginatedItems<T>(url));
+      list.push(this.fetchPaginatedItems<T>(url, pagelen));
     }
 
     return Promise.all(list).then(value => value.flatMap(x => x));
@@ -123,6 +140,10 @@ export class BitbucketDataSource implements DataSource {
 
   private async fetchOpenPullRequests(repositories: Repository[]): Promise<BitbucketPullRequest[]> {
     return await this.fetchInParallel<BitbucketPullRequest>(repositories.map(repo => `https://api.bitbucket.org/2.0/repositories/${repo.project}/${repo.name}/pullrequests`));
+  }
+
+  private async fetchBranches(repositories: Repository[]): Promise<BitbucketBranch[]> {
+    return await this.fetchInParallel<BitbucketBranch>(repositories.map(repo => `https://api.bitbucket.org/2.0/repositories/${repo.project}/${repo.name}/refs/branches`), 100);
   }
 
 }

@@ -1,32 +1,42 @@
 import {createSlice} from '@reduxjs/toolkit'
 import type {PayloadAction} from '@reduxjs/toolkit'
 import {RootState} from "./store";
-import {PullRequest} from "../services/DataSource";
+import {GroupedPullRequest} from "../services/DataSource";
 import moment, {Moment} from "moment/moment";
 import {clearStateAction} from "./shared-actions";
 
 const SLICE_KEY = 'pull-requests';
 export const EMPTY_TIME = moment(0);
 
+// used for differentiate between different data. For example data is
+// saved in storage, and then a new version is deployed and
+// the data can't be used anymore since it's in the wrong format.
+//
+// Increment this value when the data structure is changes (e.g. new feature was added)
+const CURRENT_DATA_VERSION = 1;
+
 interface RemoteDataState {
-  pullRequests: PullRequest[];
+  data: GroupedPullRequest[];
   lastUpdate: number;
   isLoading: boolean;
+  version: number;
 }
 
 const initialState: RemoteDataState = {
-  pullRequests: [],
+  data: [],
   lastUpdate: 0,
   isLoading: false,
+  version: CURRENT_DATA_VERSION,
 }
 
 export const remoteDataSlice = createSlice({
   name: SLICE_KEY,
   initialState,
   reducers: {
-    updatePullRequests: (state, action: PayloadAction<PullRequest[]>) => {
-      state.pullRequests = action.payload;
+    updateData: (state, action: PayloadAction<GroupedPullRequest[]>) => {
+      state.data = action.payload;
       state.lastUpdate = moment().valueOf();
+      state.version = CURRENT_DATA_VERSION;
     },
     updateIsLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -37,9 +47,10 @@ export const remoteDataSlice = createSlice({
   },
 });
 
-export const { updatePullRequests, updateIsLoading } = remoteDataSlice.actions;
+export const { updateData, updateIsLoading } = remoteDataSlice.actions;
 
-export const selectPullRequests = (state: RootState): PullRequest[] => state.remoteData.pullRequests;
+export const selectData = (state: RootState): GroupedPullRequest[] => state.remoteData.data;
+export const selectIsDataWithLatestVersion = (state: RootState): boolean => state.remoteData.version === CURRENT_DATA_VERSION;
 export const selectLastUpdate = (state: RootState): Moment => moment(state.remoteData.lastUpdate);
 export const selectIsLoading = (state: RootState): boolean => state.remoteData.isLoading;
 

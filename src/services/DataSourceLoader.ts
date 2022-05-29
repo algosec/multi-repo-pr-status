@@ -77,6 +77,9 @@ export class DataSourceLoader {
       const repositories = await this.dataSource.getRepositories();
       const pullRequests = await this.dataSource.getPullRequests(repositories);
       const branches = await this.dataSource.getBranches(repositories);
+
+      console.log(`Pulled from ${this.dataSource.getType()}: ${repositories.length} repositories, ${pullRequests.length} pull-requests, ${branches.length} branches`);
+
       const data = groupPullRequests(pullRequests, branches);
       store.dispatch(updateData(data));
     } catch (err) {

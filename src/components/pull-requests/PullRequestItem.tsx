@@ -69,7 +69,7 @@ export function PullRequestItem(props: PullRequestProps) {
         <div>
           Source branch <span className="box branch-box"><FontAwesomeIcon icon={faCodeBranch} /> {props.data.source}</span> exists <b>without</b> open pull-request for
           &nbsp;
-          {props.data.sourceBranchesWithoutPullRequest.map(item => <a key={item.name} href={item.link} target="_blank" rel="noreferrer" className="box repo-box">
+          {props.data.sourceBranchesWithoutPullRequest.map(item => <a key={item.repository.name} href={item.link} target="_blank" rel="noreferrer" className="box repo-box">
             <FontAwesomeIcon icon={faGitAlt} /> {item.repository.name}
           </a>)}
         </div>

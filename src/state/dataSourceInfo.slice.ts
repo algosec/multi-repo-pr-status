@@ -1,8 +1,8 @@
 import {createSlice} from '@reduxjs/toolkit'
 import type {PayloadAction} from '@reduxjs/toolkit'
-import {DataSourceInfo} from "../services/DataSourceProvider";
 import {RootState} from "./store";
 import {clearStateAction} from "./shared-actions";
+import {DataSourceInfo} from "../services/DataSource";
 
 const SLICE_KEY = 'data-source';
 

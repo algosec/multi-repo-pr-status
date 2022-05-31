@@ -1,6 +1,5 @@
 import axios, {AxiosError} from "axios";
-import {Branch, Credentials, DataSource, PullRequest, Repository} from "../DataSource";
-import {DataSourceType} from "../DataSourceProvider";
+import {Branch, Credentials, DataSource, DataSourceType, PullRequest, Repository} from "../DataSource";
 import {
   BitbucketPullRequest,
   BitbucketRepository, BitbucketUser, BitbucketWorkspace,
@@ -83,10 +82,6 @@ export class BitbucketDataSource implements DataSource {
       }
       return String(e);
     }
-  }
-
-  public async fetchUserDisplayName(): Promise<string> {
-    return (await this.fetchUser()).display_name;
   }
 
   private async fetchUser(): Promise<BitbucketUser> {

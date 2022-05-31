@@ -1,7 +1,8 @@
-import {DataSourceType} from "../services/DataSourceProvider";
 import React from "react";
-import {faBitbucket} from "@fortawesome/free-brands-svg-icons";
+import {faBitbucket, faGithub} from "@fortawesome/free-brands-svg-icons";
+import {faQuestionCircle} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {DataSourceType} from "../services/DataSource";
 
 export interface DataSourceIconProps {
   type: DataSourceType;
@@ -10,7 +11,8 @@ export interface DataSourceIconProps {
 function getDataSourceIcon(type: DataSourceType) {
   switch (type) {
     case "Bitbucket": return faBitbucket;
-    default: throw Error(`Unknown data source ${type}`);
+    case "Github": return faGithub;
+    default: return faQuestionCircle;
   }
 }
 

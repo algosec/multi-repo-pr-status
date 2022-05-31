@@ -1,4 +1,4 @@
-import {DataSource} from "./DataSource";
+import {DataSource, DataSourceInfo} from "./DataSource";
 import {
   EMPTY_TIME,
   updateIsLoading,
@@ -8,7 +8,7 @@ import {
 } from "../state/remoteData.slice";
 import {store} from "../state/store";
 import moment, {Moment} from "moment/moment";
-import {DataSourceInfo, generateDataSource} from "./DataSourceProvider";
+import {generateDataSource} from "./DataSourceProvider";
 import {groupPullRequests} from "./logic";
 
 const SYNC_INTERVAL_SECONDS = 15 * 60;

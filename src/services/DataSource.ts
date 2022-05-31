@@ -1,10 +1,17 @@
 export interface DataSource {
-  getType(): string;
-  fetchUserDisplayName(): Promise<string>;
+  getType(): DataSourceType;
   validateCredentials(): Promise<string|null>;
   getRepositories(): Promise<Repository[]>;
   getPullRequests(repos: Repository[]): Promise<PullRequest[]>;
   getBranches(repos: Repository[]): Promise<Branch[]>;
+}
+
+export type DataSourceType = 'Bitbucket' | 'Github';
+export const DATA_SOURCE_TYPES: DataSourceType[] = ['Bitbucket', 'Github'];
+
+export interface DataSourceInfo {
+  type: DataSourceType;
+  credentials: Credentials;
 }
 
 export interface Credentials {

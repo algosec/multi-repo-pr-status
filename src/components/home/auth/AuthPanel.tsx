@@ -2,9 +2,6 @@ import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React, {useCallback, useState} from "react";
 import {
-  DATA_SOURCE_TYPES,
-  DataSourceInfo,
-  DataSourceType,
   generateDataSource
 } from "../../../services/DataSourceProvider";
 import {useNavigate} from "react-router-dom";
@@ -14,8 +11,9 @@ import {updateDataSourceInfo} from "../../../state/dataSourceInfo.slice";
 import {MenuItem, Select, TextField} from "@mui/material";
 import type {SelectChangeEvent} from "@mui/material";
 import {DataSourceIcon} from "../../DataSourceIcon";
+import {DATA_SOURCE_TYPES, DataSourceInfo, DataSourceType} from "../../../services/DataSource";
 
-const CONNECT_TO_OPTIONS = DATA_SOURCE_TYPES.map(type => <MenuItem key={type} value={type}><DataSourceIcon type={type} /> {type}</MenuItem>);
+const CONNECT_TO_OPTIONS = DATA_SOURCE_TYPES.map(type => <MenuItem key={type} value={type}><DataSourceIcon type={type} /> &nbsp; {type}</MenuItem>);
 
 export function AuthPanel() {
 

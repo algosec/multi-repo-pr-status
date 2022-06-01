@@ -6,17 +6,12 @@ import {PullRequestsPage} from "./components/pull-requests/PullRequestsPage";
 import {Link, Navigate, Route, Routes} from "react-router-dom";
 import {ContributeLink} from "./components/ContributeLink";
 import {DataSourceHeader} from "./components/DataSourceHeader";
-import {InitialSyncIndicator} from "./components/InitialSyncIndicator";
 import {SyncStatus} from "./components/pull-requests/SyncStatus";
 import {Moment} from "moment/moment";
 import {HomePage} from "./components/home/HomePage";
 import {clearStore, useAppSelector} from "./state/store";
 import {hasDataSourceInfo, selectDataSourceInfo} from "./state/dataSourceInfo.slice";
-import {
-  EMPTY_TIME, selectIsDataWithLatestVersion,
-  selectIsLoading,
-  selectLastUpdate
-} from "./state/remoteData.slice";
+import {selectLastUpdate} from "./state/remoteData.slice";
 import {DataSourceLoader} from "./services/DataSourceLoader";
 import {DataSourceInfo} from "./services/DataSource";
 
@@ -48,10 +43,7 @@ function AppWithDataSource() {
   const dataSourceInfo = useAppSelector<DataSourceInfo>(selectDataSourceInfo);
   const dataSourceLoader = useMemo<DataSourceLoader>(() => new DataSourceLoader(dataSourceInfo), [dataSourceInfo]);
 
-  const isDataWithLatestVersion = useAppSelector<boolean>(selectIsDataWithLatestVersion);
-
   const lastUpdate = useAppSelector<Moment>(selectLastUpdate);
-  const isLoading = useAppSelector<boolean>(selectIsLoading);
 
   const triggerSync = useCallback(() => dataSourceLoader.reload(), [dataSourceLoader]);
 
@@ -60,10 +52,6 @@ function AppWithDataSource() {
     return () => dataSourceLoader.destroy()
   }, [dataSourceLoader]);
 
-  if (lastUpdate.isSame(EMPTY_TIME) || !isDataWithLatestVersion) {
-    return <InitialSyncIndicator isLoading={isLoading} />;
-  }
-
   return (
     <div>
       <div className="Sub-header">
@@ -71,7 +59,7 @@ function AppWithDataSource() {
           <DataSourceHeader dataSourceInfo={dataSourceInfo} /> (<SyncStatus lastUpdate={lastUpdate} />)
         </div>
         <div className="align-right">
-          <button onClick={triggerSync} className="link-button"><FontAwesomeIcon icon={faSync} spin={isLoading}/> Sync</button>
+          <button onClick={triggerSync} className="link-button"><FontAwesomeIcon icon={faSync} /> Sync</button>
           <button className="link-button margin-left" onClick={clearStore}><FontAwesomeIcon icon={faRightFromBracket}/> Disconnect</button>
         </div>
       </div>

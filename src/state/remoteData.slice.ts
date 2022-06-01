@@ -38,20 +38,16 @@ export const remoteDataSlice = createSlice({
       state.lastUpdate = moment().valueOf();
       state.version = CURRENT_DATA_VERSION;
     },
-    updateIsLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload;
-    },
   },
   extraReducers: (builder) => {
     builder.addCase(clearStateAction, () => initialState)
   },
 });
 
-export const { updateData, updateIsLoading } = remoteDataSlice.actions;
+export const { updateData } = remoteDataSlice.actions;
 
 export const selectData = (state: RootState): GroupedPullRequest[] => state.remoteData.data;
 export const selectIsDataWithLatestVersion = (state: RootState): boolean => state.remoteData.version === CURRENT_DATA_VERSION;
 export const selectLastUpdate = (state: RootState): Moment => moment(state.remoteData.lastUpdate);
-export const selectIsLoading = (state: RootState): boolean => state.remoteData.isLoading;
 
 export const remoteDataReducer = remoteDataSlice.reducer;

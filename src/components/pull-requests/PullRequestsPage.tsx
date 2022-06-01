@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useCallback} from "react";
+import React, {ChangeEvent, useCallback, useMemo} from "react";
 import {PullRequestItem} from "./PullRequestItem";
 import './PullRequestsPage.css';
 import {GroupedPullRequest} from "../../services/DataSource";
@@ -39,7 +39,7 @@ export function PullRequestsPage() {
 
   const updateSearchFilter = useCallback((e: ChangeEvent<HTMLInputElement>) => setSearchFilter(e.target.value), [setSearchFilter]);
 
-  function isInFilter(item: GroupedPullRequest): boolean {
+  const isInFilter = useCallback((item: GroupedPullRequest): boolean => {
     const textFilterResult: boolean = searchFilter === '' || item.source.includes(searchFilter) || item.destination.includes(searchFilter) || item.pullRequests.some(pr => pr.title.includes(searchFilter));
     const authorFilterResult: boolean = selectedAuthors.length === 0 || item.pullRequests.some(x => selectedAuthors.includes(x.author));
     const projectFilterResult: boolean = selectedProject.length === 0 || item.pullRequests.some(x => selectedProject.includes(x.destination.repository.project));
@@ -50,11 +50,19 @@ export function PullRequestsPage() {
       && projectFilterResult
       && repositoryFilterResult
     ;
-  }
+  }, [searchFilter, selectedAuthors, selectedProject, selectedRepository]);
 
-  if (groupedPullRequests.length === 0) {
-    return <div>No information available</div>;
-  }
+  const filteredGroupedPullRequests = useMemo<GroupedPullRequest[]>(() => groupedPullRequests.filter(item => isInFilter(item)), [groupedPullRequests, isInFilter]);
+
+  const noDataMessage = useMemo<string>(() => {
+    if (groupedPullRequests.length === 0) {
+      return 'No data is available';
+    } else if (filteredGroupedPullRequests.length === 0) {
+      return 'Filters has no results'
+    } else {
+      return '';
+    }
+  }, [groupedPullRequests, filteredGroupedPullRequests])
 
   return <div>
     <div className="filters">
@@ -87,11 +95,8 @@ export function PullRequestsPage() {
         className="filter-multi-select"
       />
     </div>
-    {groupedPullRequests
-      .filter(item => isInFilter(item))
-      .map(item => (
-        <PullRequestItem key={`${item.source}__${item.destination}`} data={item}/>
-      ))}
+    {filteredGroupedPullRequests.map(item => <PullRequestItem key={`${item.source}__${item.destination}`} data={item} />)}
+    {noDataMessage}
   </div>
 }
 

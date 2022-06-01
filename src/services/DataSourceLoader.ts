@@ -1,8 +1,6 @@
 import {DataSource, DataSourceInfo} from "./DataSource";
 import {
   EMPTY_TIME,
-  updateIsLoading,
-  selectIsLoading,
   selectLastUpdate,
   updateData, selectIsDataWithLatestVersion
 } from "../state/remoteData.slice";
@@ -10,6 +8,9 @@ import {store} from "../state/store";
 import moment, {Moment} from "moment/moment";
 import {generateDataSource} from "./DataSourceProvider";
 import {groupPullRequests} from "./logic";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios, {AxiosError} from "axios";
 
 const SYNC_INTERVAL_SECONDS = 15 * 60;
 
@@ -18,6 +19,7 @@ export class DataSourceLoader {
 
   private dataSource: DataSource;
   private interval: NodeJS.Timeout | null = null;
+  private isLoading = false;
 
   constructor(dataSourceInfo: DataSourceInfo) {
     this.dataSource = generateDataSource(dataSourceInfo);
@@ -62,11 +64,21 @@ export class DataSourceLoader {
   }
 
    public async reload(): Promise<void> {
-    if (selectIsLoading(store.getState())) {
+    if (this.isLoading) {
       return;
     }
 
-    store.dispatch(updateIsLoading(true));
+    await toast.promise(this.execSync(), {
+      pending: `Syncing with ${this.dataSource.getType()}. It may take a while depending on the amount of data`,
+      success: `Sync with ${this.dataSource.getType()} has completed`,
+      error: {
+        render: ({data: err}) => DataSourceLoader.composeError(err)
+      }
+    });
+  }
+
+  private async execSync(): Promise<void> {
+    this.isLoading = true;
 
     this.clearNextSync();
 
@@ -84,11 +96,29 @@ export class DataSourceLoader {
       store.dispatch(updateData(data));
     } catch (err) {
       console.error(`${syncTitle} got error`, err);
+      throw err;
     } finally {
       console.timeEnd(syncTitle);
       this.scheduleNextReload(SYNC_INTERVAL_SECONDS);
-      store.dispatch(updateIsLoading(false));
+      this.isLoading = false;
     }
+  }
+
+  private static composeError(e: unknown) {
+    if (axios.isAxiosError(e)) {
+      const status = (e as AxiosError).response?.status;
+      const message = (e as AxiosError).message;
+      if (status === 401) {
+        return "Credentials are no longer valid. Logout and login again";
+      }
+      if (status === 403) {
+        return "Credentials are missing permissions. Recreate it again, and logout and login";
+      }
+      if (message === 'Network Error') {
+        return "Sync was skipped as you're offline"
+      }
+    }
+    return String(`An error occurred during sync - ${String(e)}`);
   }
 
   private scheduleNextReload(seconds: number): void {

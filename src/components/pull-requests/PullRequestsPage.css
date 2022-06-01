@@ -16,6 +16,7 @@
 .filters {
     display: flex;
     align-items: center;
+    margin-bottom: 20px;
 }
 .filters > * {
     margin-right: 10px;

@@ -1,21 +1,62 @@
-import {Branch, Credentials, DataSource, DataSourceType, PullRequest, Repository} from "../DataSource";
+import {
+  Branch,
+  Credentials,
+  DataSource,
+  DataSourceType,
+  PullRequest,
+  PullRequestBranch,
+  Repository
+} from "../DataSource";
 import axios, {AxiosError} from "axios";
-import {BitbucketUser} from "../bitbucket/bitbucket.model";
+import {GithubPullRequest, GithubPullRequestBranch, GithubRepository, GithubUser} from "./github.model";
 
 export class GithubDataSource implements DataSource {
 
   constructor(private cred: Credentials) {}
 
-  getBranches(repos: Repository[]): Promise<Branch[]> {
+  async getBranches(repos: Repository[]): Promise<Branch[]> {
     return Promise.resolve([]);
   }
 
-  getPullRequests(repos: Repository[]): Promise<PullRequest[]> {
-    return Promise.resolve([]);
+  async getPullRequests(repos: Repository[]): Promise<PullRequest[]> {
+    const pullRequests = await this.fetchOpenPullRequests(repos);
+
+    return pullRequests.map(x => {
+      return {
+        title: x.title,
+        source: GithubDataSource.convertPullRequestBranch(x.head),
+        destination: GithubDataSource.convertPullRequestBranch(x.base),
+        author: x.user.login,
+        created: x.created_at,
+        updated: x.updated_at,
+        link: x.html_url,
+        commentsCount: x.comments,
+      };
+    });
   }
 
-  getRepositories(): Promise<Repository[]> {
-    return Promise.resolve([]);
+  private static convertPullRequestBranch(x: GithubPullRequestBranch): PullRequestBranch {
+    return {
+      name: x.ref,
+      hash: x.sha,
+      repository: {
+        name: x.repo.name,
+        title: x.repo.name,
+        project: x.repo.owner.login,
+      },
+    };
+  }
+
+  async getRepositories(): Promise<Repository[]> {
+    const list = await this.sendRequest<GithubRepository[]>(`https://api.github.com/user/repos`);
+
+    return list.map(x => {
+      return {
+        title: x.name,
+        project: x.owner.login,
+        name: x.name,
+      };
+    });
   }
 
   getType(): DataSourceType {
@@ -40,8 +81,8 @@ export class GithubDataSource implements DataSource {
     }
   }
 
-  private async fetchUser(): Promise<BitbucketUser> {
-    return this.sendRequest<BitbucketUser>(`https://api.github.com/user`);
+  private async fetchUser(): Promise<GithubUser> {
+    return this.sendRequest<GithubUser>(`https://api.github.com/user`);
   }
 
   private async sendRequest<T>(url: string): Promise<T> {
@@ -50,6 +91,16 @@ export class GithubDataSource implements DataSource {
       auth: this.cred
     });
     return response.data;
+  }
+
+  private async fetchOpenPullRequests(repositories: Repository[]): Promise<GithubPullRequest[]> {
+    return await this.fetchInParallel<GithubPullRequest>(repositories.map(repo => `https://api.github.com/repos/${repo.project}/${repo.name}/pulls`));
+  }
+
+  private async fetchInParallel<T>(urls: string[]): Promise<T[]> {
+    return Promise
+      .all(urls.map(url => this.sendRequest<T[]>(url)))
+      .then(value => value.flatMap(x => x));
   }
 
 }

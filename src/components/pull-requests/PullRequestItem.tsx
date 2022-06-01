@@ -44,10 +44,10 @@ export function PullRequestItem(props: PullRequestProps) {
         </div>
       </div>
       {props.data.pullRequests.map(item => (
-        <div key={item.repository.name} className="row">
+        <div key={`${item.source.repository.project}:${item.source.repository.name}`} className="row">
           <div>
             <a href={item.link} target="_blank" rel="noreferrer" className="box repo-box">
-              <FontAwesomeIcon icon={faGitAlt} /> {item.repository.name}
+              <FontAwesomeIcon icon={faGitAlt} /> {item.destination.repository.name}
             </a>
             <span title={item.title}>{getFirstLine(item.title)}</span>
           </div>

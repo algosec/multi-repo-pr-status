@@ -23,3 +23,10 @@ export interface GithubPullRequestBranch {
   sha: string;
   repo: GithubRepository;
 }
+
+export interface GithubBranch {
+  commit: {
+    sha: string;
+  };
+  name: string;
+}

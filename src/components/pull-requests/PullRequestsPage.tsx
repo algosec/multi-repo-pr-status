@@ -42,8 +42,8 @@ export function PullRequestsPage() {
   function isInFilter(item: GroupedPullRequest): boolean {
     const textFilterResult: boolean = searchFilter === '' || item.source.includes(searchFilter) || item.destination.includes(searchFilter) || item.pullRequests.some(pr => pr.title.includes(searchFilter));
     const authorFilterResult: boolean = selectedAuthors.length === 0 || item.pullRequests.some(x => selectedAuthors.includes(x.author));
-    const projectFilterResult: boolean = selectedProject.length === 0 || item.pullRequests.some(x => selectedProject.includes(x.repository.project));
-    const repositoryFilterResult: boolean = selectedRepository.length === 0 || item.pullRequests.some(x => selectedRepository.includes(x.repository.name));
+    const projectFilterResult: boolean = selectedProject.length === 0 || item.pullRequests.some(x => selectedProject.includes(x.destination.repository.project));
+    const repositoryFilterResult: boolean = selectedRepository.length === 0 || item.pullRequests.some(x => selectedRepository.includes(x.destination.repository.name));
 
     return textFilterResult
       && authorFilterResult
@@ -102,14 +102,14 @@ function extractAuthors(groupedPullRequests: GroupedPullRequest[]): string[] {
 
 function extractRepositories(groupedPullRequests: GroupedPullRequest[], selectedProjects: string[]): string[] {
   const list = groupedPullRequests.flatMap(x => x.pullRequests
-    .filter(y => selectedProjects.length === 0 || selectedProjects.includes(y.repository.project))
-    .map(y => y.repository.name)
+    .filter(y => selectedProjects.length === 0 || selectedProjects.includes(y.destination.repository.project))
+    .map(y => y.destination.repository.name)
   );
   return Array.from(new Set(list)); // make sure items are unique
 }
 
 function extractProjects(groupedPullRequests: GroupedPullRequest[]): string[] {
-  const list = groupedPullRequests.flatMap(x => x.pullRequests.map(y => y.repository.project));
+  const list = groupedPullRequests.flatMap(x => x.pullRequests.map(y => y.destination.repository.project));
   return Array.from(new Set(list)); // make sure items are unique
 }
 

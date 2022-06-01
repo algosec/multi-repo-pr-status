@@ -1,10 +1,17 @@
 import axios, {AxiosError} from "axios";
-import {Branch, Credentials, DataSource, PullRequest, Repository} from "../DataSource";
-import {DataSourceType} from "../DataSourceProvider";
+import {
+  Branch,
+  Credentials,
+  DataSource,
+  DataSourceType,
+  PullRequest,
+  PullRequestBranch,
+  Repository
+} from "../DataSource";
 import {
   BitbucketPullRequest,
   BitbucketRepository, BitbucketUser, BitbucketWorkspace,
-  Paginate, BitbucketBranch
+  Paginate, BitbucketBranch, BitbucketPullRequestBranch
 } from "./bitbucket.model";
 
 export class BitbucketDataSource implements DataSource {
@@ -21,21 +28,27 @@ export class BitbucketDataSource implements DataSource {
     return pullRequests.map(x => {
       return {
         title: x.title,
-        source: x.source.branch.name,
-        destination: x.destination.branch.name,
+        source: BitbucketDataSource.convertPullRequestBranch(x.source),
+        destination: BitbucketDataSource.convertPullRequestBranch(x.destination),
         author: x.author.display_name,
         created: x.created_on,
         updated: x.updated_on,
         link: x.links.html.href,
-        repository: {
-          name: x.destination.repository.full_name.split("/")[1],
-          title: x.destination.repository.name,
-          project: x.destination.repository.full_name.split("/")[0]
-        },
         commentsCount: x.comment_count,
-        hash: x.source.commit?.hash || 'unknown'
       };
     });
+  }
+
+  private static convertPullRequestBranch(x: BitbucketPullRequestBranch): PullRequestBranch {
+    return {
+      name: x.branch.name,
+      hash: x.commit?.hash || 'unknown',
+      repository: {
+        name: x.repository.full_name.split("/")[1],
+        title: x.repository.name,
+        project: x.repository.full_name.split("/")[0]
+      },
+    };
   }
 
   public async getBranches(repos: Repository[]): Promise<Branch[]> {
@@ -83,10 +96,6 @@ export class BitbucketDataSource implements DataSource {
       }
       return String(e);
     }
-  }
-
-  public async fetchUserDisplayName(): Promise<string> {
-    return (await this.fetchUser()).display_name;
   }
 
   private async fetchUser(): Promise<BitbucketUser> {

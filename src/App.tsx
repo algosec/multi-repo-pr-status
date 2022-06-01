@@ -4,7 +4,6 @@ import React, {useCallback, useEffect, useMemo} from 'react';
 import './App.css';
 import {PullRequestsPage} from "./components/pull-requests/PullRequestsPage";
 import {Link, Navigate, Route, Routes} from "react-router-dom";
-import {DataSourceInfo} from "./services/DataSourceProvider";
 import {ContributeLink} from "./components/ContributeLink";
 import {DataSourceHeader} from "./components/DataSourceHeader";
 import {InitialSyncIndicator} from "./components/InitialSyncIndicator";
@@ -19,6 +18,7 @@ import {
   selectLastUpdate
 } from "./state/remoteData.slice";
 import {DataSourceLoader} from "./services/DataSourceLoader";
+import {DataSourceInfo} from "./services/DataSource";
 
 function App() {
 

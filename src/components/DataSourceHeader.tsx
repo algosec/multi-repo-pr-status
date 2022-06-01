@@ -1,6 +1,6 @@
 import React from "react";
-import {DataSourceInfo} from "../services/DataSourceProvider";
 import {DataSourceIcon} from "./DataSourceIcon";
+import {DataSourceInfo} from "../services/DataSource";
 
 interface DataSourceHeaderProps {
   dataSourceInfo: DataSourceInfo;

@@ -34,6 +34,6 @@
   align-items: center;
 }
 
-.Sub-header > * {
+.Sub-header > *:first-child {
   flex: 1;
 }

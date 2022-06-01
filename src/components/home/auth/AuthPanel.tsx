@@ -2,9 +2,6 @@ import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React, {useCallback, useState} from "react";
 import {
-  DATA_SOURCE_TYPES,
-  DataSourceInfo,
-  DataSourceType,
   generateDataSource
 } from "../../../services/DataSourceProvider";
 import {useNavigate} from "react-router-dom";
@@ -14,8 +11,31 @@ import {updateDataSourceInfo} from "../../../state/dataSourceInfo.slice";
 import {MenuItem, Select, TextField} from "@mui/material";
 import type {SelectChangeEvent} from "@mui/material";
 import {DataSourceIcon} from "../../DataSourceIcon";
+import {DATA_SOURCE_TYPES, DataSourceInfo, DataSourceType} from "../../../services/DataSource";
 
-const CONNECT_TO_OPTIONS = DATA_SOURCE_TYPES.map(type => <MenuItem key={type} value={type}><DataSourceIcon type={type} /> {type}</MenuItem>);
+const CONNECT_TO_OPTIONS = DATA_SOURCE_TYPES.map(type => <MenuItem key={type} value={type}><DataSourceIcon type={type} /> &nbsp; {type}</MenuItem>);
+
+interface LoginTypeDefinition {
+  usernameTitle: string,
+  usernameInfo: JSX.Element,
+  passwordTitle: string,
+  passwordInfo: JSX.Element,
+}
+
+const LOGIN_TYPE_DEFINITIONS: {[type in DataSourceType]: LoginTypeDefinition} = {
+  'Bitbucket': {
+    usernameTitle: 'Username',
+    usernameInfo: UsernameInfoBitbucket(),
+    passwordTitle: 'Application password',
+    passwordInfo: PasswordInfoBitbucket(),
+  },
+  'Github': {
+    usernameTitle: 'Username',
+    usernameInfo: UsernameInfoGithub(),
+    passwordTitle: 'Access token',
+    passwordInfo: PasswordInfoGithub(),
+  },
+};
 
 export function AuthPanel() {
 
@@ -71,7 +91,7 @@ export function AuthPanel() {
       </div>
 
       <div className="auth-row">
-        <div className="title">Username</div>
+        <div className="title">{LOGIN_TYPE_DEFINITIONS[type].usernameTitle}</div>
         <div className="section">
           <TextField
             name="user"
@@ -81,12 +101,12 @@ export function AuthPanel() {
         </div>
         <div className="info">
           <FontAwesomeIcon icon={faInfoCircle} className="info-icon" />
-          <UsernameInfoBitbucket />
+          {LOGIN_TYPE_DEFINITIONS[type].usernameInfo}
         </div>
       </div>
 
       <div className="auth-row">
-        <div className="title">Application password</div>
+        <div className="title">{LOGIN_TYPE_DEFINITIONS[type].passwordTitle}</div>
         <div className="section">
           <TextField
             name="password"
@@ -97,7 +117,7 @@ export function AuthPanel() {
         </div>
         <div className="info">
           <FontAwesomeIcon icon={faInfoCircle} className="info-icon" />
-          <PasswordInfoBitbucket />
+          {LOGIN_TYPE_DEFINITIONS[type].passwordInfo}
         </div>
       </div>
 
@@ -120,3 +140,19 @@ function PasswordInfoBitbucket() {
     Required permissions: <i>Account - Read</i>, <i>Pull requests - Write</i>
   </div>;
 }
+
+function UsernameInfoGithub() {
+  return <div>Username is the regular name that you use to login to GitHub</div>;
+}
+
+function PasswordInfoGithub() {
+  return <div>
+    Create personal access token <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer">here</a>.
+    <br />
+    Expiration: <i>No Expiration</i>
+    <br />
+    Required permissions: <i>repo</i>, <i>read:user</i>
+  </div>;
+}
+
+

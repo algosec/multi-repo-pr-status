@@ -1,5 +1,5 @@
 import moment from "moment";
-import {Branch, GroupedPullRequest, PullRequest, Repository} from "./DataSource";
+import {Branch, GroupedPullRequest, PullRequest, PullRequestBranch, Repository} from "./DataSource";
 
 export function groupPullRequests(pullRequests: PullRequest[], branches: Branch[]): GroupedPullRequest[] {
   const branchesMap: Map<string, Branch[]> = new Map<string, Branch[]>();
@@ -17,15 +17,15 @@ export function groupPullRequests(pullRequests: PullRequest[], branches: Branch[
   });
 
   pullRequests.forEach(pullRequest => {
-    const source = pullRequest.source;
-    const dest = pullRequest.destination;
-    const key = `${source}__${dest}`;
+    const source: PullRequestBranch = pullRequest.source;
+    const dest: PullRequestBranch = pullRequest.destination;
+    const key = `${source.name}__${dest.name}`;
 
     let groupedPullRequests = map.get(key);
     if (!groupedPullRequests) {
       groupedPullRequests = {
-        source: source,
-        destination: dest,
+        source: source.name,
+        destination: dest.name,
         created: pullRequest.created,
         updated: pullRequest.updated,
         pullRequests: [pullRequest],
@@ -46,7 +46,7 @@ export function groupPullRequests(pullRequests: PullRequest[], branches: Branch[
       return;
     }
 
-    const repositoriesWithPr: Repository[] = groupedPullRequests.pullRequests.map(x => x.repository);
+    const repositoriesWithPr: Repository[] = groupedPullRequests.pullRequests.map(x => x.destination.repository);
     const repositoriesWithoutPR = allBranches.filter(branch => !repositoriesWithPr.some(repo => repo.name === branch.repository.name));
 
     groupedPullRequests.sourceBranchesWithoutPullRequest.push(...repositoriesWithoutPR);

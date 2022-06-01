@@ -23,7 +23,7 @@ export interface BitbucketRepository {
   name: string;
 }
 
-export interface Paginate<T> {
+export interface BitbucketPaginate<T> {
   pagelen: number;
   size: number;
   page: number;
@@ -48,7 +48,7 @@ export interface BitbucketPullRequestBranch {
   commit?: {
     hash: BitbucketCommitHash;
   };
-  repository: {
+  repository?: {
     name: string;
     full_name: string;
   };

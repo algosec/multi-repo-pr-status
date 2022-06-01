@@ -11,7 +11,7 @@ import {
 import {
   BitbucketPullRequest,
   BitbucketRepository, BitbucketUser, BitbucketWorkspace,
-  Paginate, BitbucketBranch, BitbucketPullRequestBranch
+  BitbucketPaginate, BitbucketBranch, BitbucketPullRequestBranch
 } from "./bitbucket.model";
 
 export class BitbucketDataSource implements DataSource {
@@ -42,11 +42,11 @@ export class BitbucketDataSource implements DataSource {
   private static convertPullRequestBranch(x: BitbucketPullRequestBranch): PullRequestBranch {
     return {
       name: x.branch.name,
-      hash: x.commit?.hash || 'unknown',
+      hash: x?.commit?.hash || 'unknown',
       repository: {
-        name: x.repository.full_name.split("/")[1],
-        title: x.repository.name,
-        project: x.repository.full_name.split("/")[0]
+        name: x?.repository?.full_name.split("/")[1] || 'deleted',
+        title: x?.repository?.name || 'deleted',
+        project: x?.repository?.full_name.split("/")[0] || 'deleted'
       },
     };
   }
@@ -103,16 +103,12 @@ export class BitbucketDataSource implements DataSource {
   }
 
   private async fetchPaginatedItems<T>(url: string, pagelen = 50): Promise<T[]> {
-    if (!this.cred) {
-      throw Error("missing credentials");
-    }
-
     const list: T[] = [];
 
     url = `${url}?pagelen=${pagelen}`;
 
-    while (url != null) {
-      const data = await this.sendRequest<Paginate<T>>(url);
+    while (url) {
+      const data = await this.sendRequest<BitbucketPaginate<T>>(url);
 
       list.push(...data.values);
       url = data.next;
@@ -122,6 +118,10 @@ export class BitbucketDataSource implements DataSource {
   }
 
   private async sendRequest<T>(url: string): Promise<T> {
+    if (!this.cred) {
+      throw Error("missing credentials");
+    }
+
     console.debug(`REST CALL: ${url}`);
     const response = await axios.get<T>(url, {
       auth: this.cred

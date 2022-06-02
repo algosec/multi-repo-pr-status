@@ -43,6 +43,7 @@ export interface PullRequestBranch {
 }
 
 export interface GroupedPullRequest {
+  id: string;
   source: string;
   destination: string;
   pullRequests: PullRequest[];

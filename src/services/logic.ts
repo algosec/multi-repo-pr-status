@@ -24,6 +24,7 @@ export function groupPullRequests(pullRequests: PullRequest[], branches: Branch[
     let groupedPullRequests = map.get(key);
     if (!groupedPullRequests) {
       groupedPullRequests = {
+        id: `${source.name}__${dest.name}`,
         source: source.name,
         destination: dest.name,
         created: pullRequest.created,

@@ -6,6 +6,9 @@ import {BrowserRouter} from "react-router-dom";
 import {Provider} from "react-redux";
 import {store} from "./state/store";
 import {ToastContainer} from "react-toastify";
+import {cleanupLegacyDataFromStorage} from "./services/cleanup";
+
+cleanupLegacyDataFromStorage();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

@@ -3,9 +3,15 @@ import {PullRequestItem} from "./PullRequestItem";
 import './PullRequestsPage.css';
 import {GroupedPullRequest} from "../../services/DataSource";
 import { MultiSelect } from "react-multi-select-component";
-import useLocalStorage from "use-local-storage";
-import {useAppSelector} from "../../state/store";
+import {useAppDispatch, useAppSelector} from "../../state/store";
 import {selectData} from "../../state/remoteData.slice";
+import {
+  Option,
+  selectAuthorsFilter, selectFreeTextFilter,
+  selectProjectsFilter,
+  selectRepositoriesFilter, updateAuthorsFilter, updateFreeTextFilter,
+  updateProjectsFilter, updateRepositoriesFilter
+} from "../../state/filters.slice";
 
 const OVERRIDE_STRINGS_PROJECT = {"selectSomeItems": "Search project"};
 const OVERRIDE_STRINGS_AUTHOR = {"selectSomeItems": "Search author"};
@@ -13,25 +19,31 @@ const OVERRIDE_STRINGS_REPOSITORY = {"selectSomeItems": "Search repository"};
 
 export function PullRequestsPage() {
 
+  const dispatch = useAppDispatch();
+
   const groupedPullRequests = useAppSelector<GroupedPullRequest[]>(selectData);
 
   // free text filter
-  const [searchFilter, setSearchFilter] = useLocalStorage("filter-free-text", "");
+  const searchFilter = useAppSelector<string>(selectFreeTextFilter);
+  const setSearchFilter = useCallback((x: string) => dispatch(updateFreeTextFilter(x)), [dispatch]);
 
   // project multi-select filter
-  const [projectFilter, setProjectFilter] = useLocalStorage<Option[]>("filter-project", []);
+  const projectFilter = useAppSelector<Option[]>(selectProjectsFilter);
+  const setProjectFilter = useCallback((x: Option[]) => dispatch(updateProjectsFilter(x)), [dispatch]);
   const selectedProject = projectFilter.map(x => x.value);
   const projectList: Option[] = extractProjects(groupedPullRequests)
     .map(x => {return {label: x, value: x}});
 
   // repository multi-select filter
-  const [repositoryFilter, setRepositoryFilter] = useLocalStorage<Option[]>("filter-repository", []);
+  const repositoryFilter = useAppSelector<Option[]>(selectRepositoriesFilter);
+  const setRepositoryFilter = useCallback((x: Option[])  => dispatch(updateRepositoriesFilter(x)), [dispatch]);
   const selectedRepository = repositoryFilter.map(x => x.value);
   const repositoryList: Option[] = extractRepositories(groupedPullRequests, selectedProject)
     .map(x => {return {label: x, value: x}});
 
   // author multi-select filter
-  const [authorFilter, setAuthorFilter] = useLocalStorage<Option[]>("filter-author", []);
+  const authorFilter = useAppSelector<Option[]>(selectAuthorsFilter);
+  const setAuthorFilter = useCallback((x: Option[])  => dispatch(updateAuthorsFilter(x)), [dispatch]);
   const selectedAuthors = authorFilter.map(x => x.value);
   const authorsList: Option[] = extractAuthors(groupedPullRequests)
     .map(x => {return {label: x, value: x}});
@@ -52,17 +64,17 @@ export function PullRequestsPage() {
     ;
   }, [searchFilter, selectedAuthors, selectedProject, selectedRepository]);
 
-  const filteredGroupedPullRequests = useMemo<GroupedPullRequest[]>(() => groupedPullRequests.filter(item => isInFilter(item)), [groupedPullRequests, isInFilter]);
+  const itemsInFilters = useMemo<Set<string>>(() => new Set<string>(groupedPullRequests.filter(item => isInFilter(item)).map(x => x.id)), [groupedPullRequests, isInFilter]);
 
   const noDataMessage = useMemo<string>(() => {
     if (groupedPullRequests.length === 0) {
       return 'No data is available';
-    } else if (filteredGroupedPullRequests.length === 0) {
+    } else if (itemsInFilters.size === 0) {
       return 'Filters has no results'
     } else {
       return '';
     }
-  }, [groupedPullRequests, filteredGroupedPullRequests])
+  }, [groupedPullRequests, itemsInFilters])
 
   return <div>
     <div className="filters">
@@ -95,7 +107,9 @@ export function PullRequestsPage() {
         className="filter-multi-select"
       />
     </div>
-    {filteredGroupedPullRequests.map(item => <PullRequestItem key={`${item.source}__${item.destination}`} data={item} />)}
+    {groupedPullRequests.map(item => <div key={item.id} className={!itemsInFilters.has(item.id) ? 'hidden' : ''}>
+      <PullRequestItem data={item} />
+    </div>)}
     {noDataMessage}
   </div>
 }
@@ -116,13 +130,4 @@ function extractRepositories(groupedPullRequests: GroupedPullRequest[], selected
 function extractProjects(groupedPullRequests: GroupedPullRequest[]): string[] {
   const list = groupedPullRequests.flatMap(x => x.pullRequests.map(y => y.destination.repository.project));
   return Array.from(new Set(list)); // make sure items are unique
-}
-
-// this interface belongs to "react-multi-select-component",
-// however, it's not exported, so had to paste it here.
-interface Option {
-  value: string;
-  label: string;
-  key?: string;
-  disabled?: boolean;
 }

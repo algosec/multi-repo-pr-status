@@ -1,19 +1,20 @@
 
-export function loadState<T>(key: string): T | undefined {
+export function getItemFromStorage<T>(key: string): T | undefined {
   try {
     const serializedState = localStorage.getItem(key);
     if (!serializedState) return undefined;
     return JSON.parse(serializedState);
-  } catch (e) {
+  } catch (e: unknown) {
+    console.warn(e);
     return undefined;
   }
 }
 
-export async function saveState<T>(key: string, state: T) {
-  try {
-    const serializedState = JSON.stringify(state);
-    localStorage.setItem(key, serializedState);
-  } catch (e) {
-    // Ignore
-  }
+export function setItemInStorage<T>(key: string, state: T): void {
+  const serializedState = JSON.stringify(state);
+  localStorage.setItem(key, serializedState);
+}
+
+export function deleteItemFromStorage(key: string): void {
+  localStorage.removeItem(key);
 }

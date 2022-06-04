@@ -32,5 +32,8 @@
 .filter-multi-select {
     display: inline-block;
     width: 200px;
+}
 
+.hidden {
+    display: none;
 }

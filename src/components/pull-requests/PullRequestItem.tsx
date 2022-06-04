@@ -10,24 +10,7 @@ interface PullRequestProps {
   data: GroupedPullRequest;
 }
 
-export function PullRequestItem(props: PullRequestProps) {
-
-
-  function getActivityColor(date: string): string {
-    const diff =  moment().diff(moment(date), 'days');
-    if (diff < 7) {
-      return "active";
-    } else if (diff < 25) {
-      return "semi-active";
-    } else {
-      return "inactive";
-    }
-  }
-
-  function getFirstLine(str: string): string  {
-    return str.split('\n')[0];
-  }
-
+export const PullRequestItem = React.memo((props: PullRequestProps) => {
   return (
     <div className="PullRequest">
       <div className="row">
@@ -76,4 +59,19 @@ export function PullRequestItem(props: PullRequestProps) {
       </div>}
     </div>
   );
+});
+
+function getActivityColor(date: string): string {
+  const diff =  moment().diff(moment(date), 'days');
+  if (diff < 7) {
+    return "active";
+  } else if (diff < 25) {
+    return "semi-active";
+  } else {
+    return "inactive";
+  }
+}
+
+function getFirstLine(str: string): string  {
+  return str.split('\n')[0];
 }

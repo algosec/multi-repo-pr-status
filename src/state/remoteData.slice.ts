@@ -13,7 +13,7 @@ export const EMPTY_TIME = moment(0);
 // the data can't be used anymore since it's in the wrong format.
 //
 // Increment this value when the data structure is changes (e.g. new feature was added)
-const CURRENT_DATA_VERSION = 2;
+const CURRENT_DATA_VERSION = 3;
 
 interface RemoteDataState {
   data: GroupedPullRequest[];
